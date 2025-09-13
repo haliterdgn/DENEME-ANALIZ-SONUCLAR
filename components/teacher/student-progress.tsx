@@ -1,22 +1,51 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { useExamStore } from "@/lib/stores/exam-store"
 import { useUserStore } from "@/lib/stores/user-store"
+import { apiClient } from "@/lib/api-client"
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts"
-import { TrendingUp, TrendingDown, Minus } from "lucide-react"
+import { TrendingUp, TrendingDown, Minus, User, BookOpen } from "lucide-react"
 
 export default function StudentProgress() {
   const [selectedStudent, setSelectedStudent] = useState<string>("")
+  const [selectedExam, setSelectedExam] = useState<string>("")
+  const [studentDetailedResults, setStudentDetailedResults] = useState<any[]>([])
+  const [loading, setLoading] = useState(false)
   const { exams, getResultsByStudentId } = useExamStore()
   const { users } = useUserStore()
 
   const students = users.filter((u) => u.role === "student")
   const studentResults = selectedStudent ? getResultsByStudentId(selectedStudent) : []
   const selectedStudentData = students.find((s) => s.id === selectedStudent)
+
+  // API'den öğrenci detaylarını çek
+  const fetchStudentDetails = async () => {
+    if (!selectedStudent || !selectedExam) return
+    
+    setLoading(true)
+    try {
+      const results = await apiClient.getStudentResults(selectedExam, {
+        limit: 50
+      })
+      
+      // Seçilen öğrencinin sonuçlarını filtrele
+      const studentData = results?.filter((result: any) => 
+        result.studentId === selectedStudent || 
+        result.studentNumber === selectedStudent
+      ) || []
+      
+      setStudentDetailedResults(studentData)
+    } catch (error) {
+      console.error('Öğrenci detayları yüklenirken hata:', error)
+    } finally {
+      setLoading(false)
+    }
+  }
 
   // Prepare progress data
   const progressData = studentResults
@@ -54,9 +83,10 @@ export default function StudentProgress() {
     (acc, result) => {
       Object.entries(result.subjectScores).forEach(([subject, scores]) => {
         if (!acc[subject]) acc[subject] = []
+        const typedScores = scores as { correct: number; total: number }
         acc[subject].push({
           examName: exams.find((e) => e.id === result.examId)?.name || "Unknown",
-          percentage: Math.round((scores.correct / scores.total) * 100),
+          percentage: Math.round((typedScores.correct / typedScores.total) * 100),
           date: result.completedAt,
         })
       })
@@ -72,8 +102,9 @@ export default function StudentProgress() {
         if (!acc[topic]) {
           acc[topic] = { correct: 0, total: 0 }
         }
-        acc[topic].correct += scores.correct
-        acc[topic].total += scores.total
+        const typedScores = scores as { correct: number; total: number }
+        acc[topic].correct += typedScores.correct
+        acc[topic].total += typedScores.total
       })
       return acc
     },
@@ -81,10 +112,13 @@ export default function StudentProgress() {
   )
 
   const weakTopics = Object.entries(weakAreas)
-    .map(([topic, scores]) => ({
-      topic,
-      percentage: Math.round((scores.correct / scores.total) * 100),
-    }))
+    .map(([topic, scores]) => {
+      const typedScores = scores as { correct: number; total: number }
+      return {
+        topic,
+        percentage: Math.round((typedScores.correct / typedScores.total) * 100),
+      }
+    })
     .filter((t) => t.percentage < 70)
     .sort((a, b) => a.percentage - b.percentage)
     .slice(0, 5)
@@ -106,6 +140,114 @@ export default function StudentProgress() {
           </SelectContent>
         </Select>
       </div>
+
+      {/* Yeni API Detaylı Analiz */}
+      {selectedStudent && (
+        <Card className="border-2 border-blue-200">
+          <CardHeader className="bg-blue-50">
+            <CardTitle className="flex items-center gap-2">
+              <User className="h-5 w-5" />
+              Detaylı Öğrenci Analizi (Yeni API)
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="pt-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+              <div>
+                <label className="block text-sm font-medium mb-2">Sınav Seç</label>
+                <Select onValueChange={setSelectedExam}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Analiz için sınav seçin" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {exams.map((exam) => (
+                      <SelectItem key={exam.id} value={exam.id}>
+                        {exam.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              
+              <div className="flex items-end">
+                <Button 
+                  onClick={fetchStudentDetails} 
+                  disabled={!selectedExam || loading}
+                  className="w-full"
+                >
+                  {loading ? 'Yükleniyor...' : 'Detayları Getir'}
+                </Button>
+              </div>
+            </div>
+
+            {/* Öğrenci Detay Sonuçları */}
+            {studentDetailedResults.length > 0 && (
+              <div className="space-y-4">
+                <h3 className="text-lg font-semibold flex items-center gap-2">
+                  <BookOpen className="h-5 w-5" />
+                  Sınav Detay Sonuçları
+                </h3>
+                
+                {studentDetailedResults.map((result, index) => (
+                  <Card key={index} className="bg-gray-50">
+                    <CardContent className="p-4">
+                      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                        <div>
+                          <div className="text-sm text-gray-600">Doğru Cevap</div>
+                          <div className="text-lg font-bold text-green-600">
+                            {result.correctAnswers || 0}
+                          </div>
+                        </div>
+                        
+                        <div>
+                          <div className="text-sm text-gray-600">Yanlış Cevap</div>
+                          <div className="text-lg font-bold text-red-600">
+                            {result.wrongAnswers || 0}
+                          </div>
+                        </div>
+                        
+                        <div>
+                          <div className="text-sm text-gray-600">Net Puan</div>
+                          <div className="text-lg font-bold text-blue-600">
+                            {result.netScore || 0}
+                          </div>
+                        </div>
+                        
+                        <div>
+                          <div className="text-sm text-gray-600">Başarı Oranı</div>
+                          <div className={`text-lg font-bold ${
+                            (result.scorePercentage || 0) >= 80 ? 'text-green-600' :
+                            (result.scorePercentage || 0) >= 60 ? 'text-yellow-600' : 'text-red-600'
+                          }`}>
+                            {result.scorePercentage || 0}%
+                          </div>
+                        </div>
+                      </div>
+                      
+                      {/* Ders bazında sonuçlar */}
+                      {result.subjectResults && (
+                        <div className="mt-4">
+                          <div className="text-sm font-medium mb-2">Ders Bazında Performans:</div>
+                          <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
+                            {Object.entries(result.subjectResults).map(([subject, subjectData]: [string, any]) => (
+                              <div key={subject} className="text-xs bg-white p-2 rounded">
+                                <div className="font-medium">{subject}</div>
+                                <div className="text-gray-600">
+                                  {subjectData.correct || 0}/{subjectData.total || 0} 
+                                  ({Math.round(((subjectData.correct || 0) / (subjectData.total || 1)) * 100)}%)
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      )}
 
       {selectedStudent && selectedStudentData ? (
         <div className="space-y-6">
@@ -200,7 +342,8 @@ export default function StudentProgress() {
               <CardContent>
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                   {Object.entries(subjectProgress).map(([subject, data]) => {
-                    const sortedData = data.sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())
+                    const typedData = data as Array<{ examName: string; percentage: number; date: string }>
+                    const sortedData = typedData.sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())
                     const latestScore = sortedData[sortedData.length - 1]?.percentage || 0
 
                     return (
@@ -300,15 +443,18 @@ export default function StudentProgress() {
                           <div>
                             <p className="font-medium mb-2">Ders Performansı:</p>
                             <div className="space-y-1">
-                              {Object.entries(result.subjectScores).map(([subject, scores]) => (
-                                <div key={subject} className="flex justify-between">
-                                  <span>{subject}:</span>
-                                  <span>
-                                    {scores.correct}/{scores.total} ({Math.round((scores.correct / scores.total) * 100)}
-                                    %)
-                                  </span>
-                                </div>
-                              ))}
+                              {Object.entries(result.subjectScores).map(([subject, scores]) => {
+                                const typedScores = scores as { correct: number; total: number }
+                                return (
+                                  <div key={subject} className="flex justify-between">
+                                    <span>{subject}:</span>
+                                    <span>
+                                      {typedScores.correct}/{typedScores.total} ({Math.round((typedScores.correct / typedScores.total) * 100)}
+                                      %)
+                                    </span>
+                                  </div>
+                                )
+                              })}
                             </div>
                           </div>
 
@@ -316,16 +462,22 @@ export default function StudentProgress() {
                             <p className="font-medium mb-2">En Zayıf Konular:</p>
                             <div className="space-y-1">
                               {Object.entries(result.topicScores)
-                                .filter(([_, scores]) => scores.correct / scores.total < 0.7)
+                                .filter(([_, scores]) => {
+                                  const typedScores = scores as { correct: number; total: number }
+                                  return typedScores.correct / typedScores.total < 0.7
+                                })
                                 .slice(0, 3)
-                                .map(([topic, scores]) => (
-                                  <div key={topic} className="flex justify-between text-red-600">
-                                    <span className="truncate">{topic}:</span>
-                                    <span>
-                                      {scores.correct}/{scores.total}
-                                    </span>
-                                  </div>
-                                ))}
+                                .map(([topic, scores]) => {
+                                  const typedScores = scores as { correct: number; total: number }
+                                  return (
+                                    <div key={topic} className="flex justify-between text-red-600">
+                                      <span className="truncate">{topic}:</span>
+                                      <span>
+                                        {typedScores.correct}/{typedScores.total}
+                                      </span>
+                                    </div>
+                                  )
+                                })}
                             </div>
                           </div>
                         </div>

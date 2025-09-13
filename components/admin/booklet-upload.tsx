@@ -2,17 +2,28 @@
 
 import type React from "react"
 
-import { useState, useRef } from "react"
+import { useState, useRef, useEffect } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
+
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { useExamStore, type QuestionMapping } from "@/lib/stores/exam-store"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { useExamStore } from "@/lib/stores/exam-store"
 import { useAuthStore } from "@/lib/stores/auth-store"
+import { useOptikFormStore } from "@/lib/stores/optik-form-store"
+import { apiClient } from "@/lib/api-client"
 import { Upload, X, FileSpreadsheet, FileText, CheckCircle } from "lucide-react"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import * as XLSX from "xlsx"
+
+interface QuestionMapping {
+  questionNumber: number
+  correctAnswer: string
+  subject?: string
+  topic?: string
+}
 
 interface BookletUploadProps {
   examId: string
@@ -23,16 +34,34 @@ export default function BookletUpload({ examId, onClose }: BookletUploadProps) {
   const [activeTab, setActiveTab] = useState("kitapcik")
   const [kitapcikFile, setKitapcikFile] = useState<File | null>(null)
   const [optikFile, setOptikFile] = useState<File | null>(null)
+  const [selectedOptikFormId, setSelectedOptikFormId] = useState<string>("")
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState("")
   const [success, setSuccess] = useState("")
   const [results, setResults] = useState<any[]>([])
+  const [backendOptikForms, setBackendOptikForms] = useState<any[]>([])
 
   const kitapcikInputRef = useRef<HTMLInputElement>(null)
   const optikInputRef = useRef<HTMLInputElement>(null)
 
-  const { addBooklet, getExamById, getBookletByExamId, addResult } = useExamStore()
+  const { addBooklet, getExamById, getBookletByExamId, addResult, uploadExcel, uploadTxtResults } = useExamStore()
   const { user } = useAuthStore()
+  const { optikForms } = useOptikFormStore()
+
+  // Backend'den optik formları yükle
+  useEffect(() => {
+    const loadOptikForms = async () => {
+      try {
+        const forms = await apiClient.getOptikForms()
+        console.log('📋 Backend optik formları:', forms)
+        setBackendOptikForms(forms || [])
+      } catch (error) {
+        console.warn('⚠️ Backend optik form yükleme başarısız:', error)
+        setBackendOptikForms([])
+      }
+    }
+    loadOptikForms()
+  }, [])
 
   const exam = getExamById(examId)
   const existingBooklet = getBookletByExamId(examId)
@@ -194,21 +223,25 @@ export default function BookletUpload({ examId, onClose }: BookletUploadProps) {
         }
 
         // Ders bazında skorları hesapla
-        if (!subjectScores[question.subject]) {
-          subjectScores[question.subject] = { correct: 0, total: 0 }
-        }
-        subjectScores[question.subject].total++
-        if (isCorrect) {
-          subjectScores[question.subject].correct++
+        if (question.subject) {
+          if (!subjectScores[question.subject]) {
+            subjectScores[question.subject] = { correct: 0, total: 0 }
+          }
+          subjectScores[question.subject].total++
+          if (isCorrect) {
+            subjectScores[question.subject].correct++
+          }
         }
 
         // Konu bazında skorları hesapla
-        if (!topicScores[question.topic]) {
-          topicScores[question.topic] = { correct: 0, total: 0 }
-        }
-        topicScores[question.topic].total++
-        if (isCorrect) {
-          topicScores[question.topic].correct++
+        if (question.topic) {
+          if (!topicScores[question.topic]) {
+            topicScores[question.topic] = { correct: 0, total: 0 }
+          }
+          topicScores[question.topic].total++
+          if (isCorrect) {
+            topicScores[question.topic].correct++
+          }
         }
       })
 
@@ -235,8 +268,11 @@ export default function BookletUpload({ examId, onClose }: BookletUploadProps) {
     setError("")
 
     try {
-      const questions = await parseExcelFile(kitapcikFile)
+      // API ile Excel dosyasını yükle
+      await uploadExcel(examId, kitapcikFile)
 
+      // Fallback olarak local parsing de yap
+      const questions = await parseExcelFile(kitapcikFile)
       addBooklet({
         examId,
         questions,
@@ -248,7 +284,8 @@ export default function BookletUpload({ examId, onClose }: BookletUploadProps) {
         setSuccess("")
       }, 3000)
     } catch (err) {
-      setError("Excel dosyası işlenemedi. Lütfen formatı kontrol edin.")
+      console.error('Upload error:', err)
+      setError("Excel dosyası yüklenemedi. Lütfen formatı kontrol edin.")
     } finally {
       setLoading(false)
     }
@@ -260,10 +297,24 @@ export default function BookletUpload({ examId, onClose }: BookletUploadProps) {
       return
     }
 
+    if (!selectedOptikFormId) {
+      setError("Lütfen bir optik form seçin!")
+      return
+    }
+
     setLoading(true)
     setError("")
 
     try {
+      // API ile TXT dosyasını yükle (seçilen optik form ile)
+      try {
+        await uploadTxtResults(examId, optikFile, selectedOptikFormId)
+        console.log('✅ API yüklemesi başarılı')
+      } catch (apiError) {
+        console.warn('API yüklemesi başarısız, local parsing ile devam ediliyor:', apiError)
+      }
+
+      // Local parsing yap
       const students = await parseOptikFile(optikFile)
       const calculatedResults = calculateResults(students, existingBooklet.questions)
 
@@ -445,33 +496,60 @@ export default function BookletUpload({ examId, onClose }: BookletUploadProps) {
                     </div>
                   </div>
 
-                  <div className="space-y-2">
-                    <Label htmlFor="optik-file">TXT Optik Dosyası Seç</Label>
-                    <div className="flex items-center space-x-4">
-                      <Input
-                        id="optik-file"
-                        type="file"
-                        ref={optikInputRef}
-                        onChange={handleOptikFileSelect}
-                        accept=".txt"
-                        className="hidden"
-                      />
-                      <Button
-                        type="button"
-                        variant="outline"
-                        onClick={() => optikInputRef.current?.click()}
-                        className="flex items-center space-x-2"
-                      >
-                        <FileText className="h-4 w-4" />
-                        <span>TXT Dosyası Seç</span>
-                      </Button>
-                      {optikFile && <span className="text-sm text-gray-600">{optikFile.name}</span>}
+                  <div className="space-y-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="optik-form-select">Optik Form Seçin</Label>
+                      <Select value={selectedOptikFormId} onValueChange={setSelectedOptikFormId}>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Bir optik form seçin..." />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {backendOptikForms.length === 0 ? (
+                            <SelectItem value="none" disabled>
+                              {optikForms.length === 0 
+                                ? "Optik form bulunamadı - Önce optik form oluşturun"
+                                : "Backend'den optik formlar yükleniyor..."
+                              }
+                            </SelectItem>
+                          ) : (
+                            backendOptikForms.map((form) => (
+                              <SelectItem key={form._id || form.id} value={form._id || form.id}>
+                                {form.formAdi} ({form.formKodu})
+                              </SelectItem>
+                            ))
+                          )}
+                        </SelectContent>
+                      </Select>
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label htmlFor="optik-file">TXT Optik Dosyası Seç</Label>
+                      <div className="flex items-center space-x-4">
+                        <Input
+                          id="optik-file"
+                          type="file"
+                          ref={optikInputRef}
+                          onChange={handleOptikFileSelect}
+                          accept=".txt"
+                          className="hidden"
+                        />
+                        <Button
+                          type="button"
+                          variant="outline"
+                          onClick={() => optikInputRef.current?.click()}
+                          className="flex items-center space-x-2"
+                        >
+                          <FileText className="h-4 w-4" />
+                          <span>TXT Dosyası Seç</span>
+                        </Button>
+                        {optikFile && <span className="text-sm text-gray-600">{optikFile.name}</span>}
+                      </div>
                     </div>
                   </div>
 
                   <Button
                     onClick={handleOptikUpload}
-                    disabled={!optikFile || loading}
+                    disabled={!optikFile || !selectedOptikFormId || loading}
                     className="w-full flex items-center space-x-2"
                   >
                     <Upload className="h-4 w-4" />

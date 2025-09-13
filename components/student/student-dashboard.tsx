@@ -4,6 +4,7 @@ import { useState } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Badge } from "@/components/ui/badge"
+import { Button } from "@/components/ui/button"
 import { Progress } from "@/components/ui/progress"
 import { useExamStore } from "@/lib/stores/exam-store"
 import { useAuthStore } from "@/lib/stores/auth-store"
@@ -22,6 +23,7 @@ import {
   AlertCircle,
   TrendingDown,
   Users,
+  Eye,
 } from "lucide-react"
 import {
   LineChart,
@@ -39,9 +41,11 @@ import {
   PolarRadiusAxis,
   Radar,
 } from "recharts"
+import StudentExamDetail from "./student-exam-detail"
 
 export default function StudentDashboard() {
   const [activeTab, setActiveTab] = useState("overview")
+  const [selectedExamDetail, setSelectedExamDetail] = useState<string | null>(null)
   const { user } = useAuthStore()
   const { exams, getResultsByStudentId, results } = useExamStore()
   const { users } = useUserStore()
@@ -96,8 +100,9 @@ export default function StudentDashboard() {
         if (!acc[subject]) {
           acc[subject] = { correct: 0, total: 0, attempts: 0 }
         }
-        acc[subject].correct += scores.correct
-        acc[subject].total += scores.total
+        const scoreData = scores as { correct: number; total: number }
+        acc[subject].correct += scoreData.correct
+        acc[subject].total += scoreData.total
         acc[subject].attempts++
       })
       return acc
@@ -105,13 +110,16 @@ export default function StudentDashboard() {
     {} as Record<string, { correct: number; total: number; attempts: number }>,
   )
 
-  const subjectData = Object.entries(subjectPerformance).map(([subject, data]) => ({
-    subject,
-    percentage: Math.round((data.correct / data.total) * 100),
-    correct: data.correct,
-    total: data.total,
-    attempts: data.attempts,
-  }))
+  const subjectData = Object.entries(subjectPerformance).map(([subject, data]) => {
+    const subjectInfo = data as { correct: number; total: number; attempts: number }
+    return {
+      subject,
+      percentage: Math.round((subjectInfo.correct / subjectInfo.total) * 100),
+      correct: subjectInfo.correct,
+      total: subjectInfo.total,
+      attempts: subjectInfo.attempts,
+    }
+  })
 
   // Radar chart data for skills
   const skillsData = subjectData.map((subject) => ({
@@ -127,8 +135,9 @@ export default function StudentDashboard() {
         if (!acc[topic]) {
           acc[topic] = { correct: 0, total: 0 }
         }
-        acc[topic].correct += scores.correct
-        acc[topic].total += scores.total
+        const topicScoreData = scores as { correct: number; total: number }
+        acc[topic].correct += topicScoreData.correct
+        acc[topic].total += topicScoreData.total
       })
       return acc
     },
@@ -136,22 +145,28 @@ export default function StudentDashboard() {
   )
 
   const weakTopics = Object.entries(topicPerformance)
-    .map(([topic, scores]) => ({
-      topic,
-      percentage: Math.round((scores.correct / scores.total) * 100),
-      correct: scores.correct,
-      total: scores.total,
-    }))
+    .map(([topic, scores]) => {
+      const topicData = scores as { correct: number; total: number }
+      return {
+        topic,
+        percentage: Math.round((topicData.correct / topicData.total) * 100),
+        correct: topicData.correct,
+        total: topicData.total,
+      }
+    })
     .filter((t) => t.total >= 2) // En az 2 soru çözülmüş konular
     .sort((a, b) => a.percentage - b.percentage)
 
   const strongTopics = Object.entries(topicPerformance)
-    .map(([topic, scores]) => ({
-      topic,
-      percentage: Math.round((scores.correct / scores.total) * 100),
-      correct: scores.correct,
-      total: scores.total,
-    }))
+    .map(([topic, scores]) => {
+      const topicData = scores as { correct: number; total: number }
+      return {
+        topic,
+        percentage: Math.round((topicData.correct / topicData.total) * 100),
+        correct: topicData.correct,
+        total: topicData.total,
+      }
+    })
     .filter((t) => t.percentage >= 80 && t.total >= 2)
     .sort((a, b) => b.percentage - a.percentage)
 
@@ -292,8 +307,9 @@ export default function StudentDashboard() {
       </div>
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-        <TabsList className="grid w-full grid-cols-6">
+        <TabsList className="grid w-full grid-cols-7">
           <TabsTrigger value="overview">📊 Genel Bakış</TabsTrigger>
+          <TabsTrigger value="exams">📝 Sınavlarım</TabsTrigger>
           <TabsTrigger value="detailed">🔍 Detaylı Analiz</TabsTrigger>
           <TabsTrigger value="progress">📈 İlerleme</TabsTrigger>
           <TabsTrigger value="subjects">📚 Dersler</TabsTrigger>
@@ -458,6 +474,110 @@ export default function StudentDashboard() {
                 )}
               </CardContent>
             </Card>
+          </div>
+        </TabsContent>
+
+        <TabsContent value="exams" className="space-y-6">
+          <div className="grid gap-4">
+            {myResults.length > 0 ? (
+              myResults.map((result) => {
+                const exam = exams.find(e => e.id === result.examId)
+                const percentage = Math.round((result.score / result.totalQuestions) * 100)
+                
+                return (
+                  <Card key={result.id} className="border-2 hover:border-blue-300 transition-colors">
+                    <CardHeader>
+                      <div className="flex justify-between items-start">
+                        <div>
+                          <CardTitle className="flex items-center gap-3">
+                            <span className="text-xl">{exam?.name || 'Bilinmeyen Sınav'}</span>
+                            <Badge variant={percentage >= 85 ? "default" : percentage >= 70 ? "secondary" : percentage >= 50 ? "outline" : "destructive"}>
+                              {percentage}%
+                            </Badge>
+                          </CardTitle>
+                          <div className="flex items-center gap-6 text-sm text-gray-600 mt-3">
+                            <div className="flex items-center gap-2">
+                              <Calendar className="h-4 w-4" />
+                              <span>{new Date(result.completedAt).toLocaleDateString("tr-TR")}</span>
+                            </div>
+                            <div className="flex items-center gap-2">
+                              <Target className="h-4 w-4" />
+                              <span>{result.score}/{result.totalQuestions} Doğru</span>
+                            </div>
+                            <div className="flex items-center gap-2">
+                              <Trophy className="h-4 w-4" />
+                              <span>
+                                {percentage >= 85 ? "Mükemmel" : 
+                                 percentage >= 70 ? "İyi" : 
+                                 percentage >= 50 ? "Orta" : "Geliştirilmeli"}
+                              </span>
+                            </div>
+                          </div>
+                        </div>
+                        <Button
+                          onClick={() => setSelectedExamDetail(result.examId)}
+                          className="flex items-center gap-2"
+                        >
+                          <Eye className="h-4 w-4" />
+                          Detayları Gör
+                        </Button>
+                      </div>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="space-y-4">
+                        <div>
+                          <div className="flex justify-between mb-2">
+                            <span className="text-sm">Başarı Oranı</span>
+                            <span className="text-sm font-medium">{percentage}%</span>
+                          </div>
+                          <div className="w-full bg-gray-200 rounded-full h-2">
+                            <div 
+                              className={`h-2 rounded-full ${
+                                percentage >= 85 ? 'bg-green-500' :
+                                percentage >= 70 ? 'bg-blue-500' :
+                                percentage >= 50 ? 'bg-yellow-500' : 'bg-red-500'
+                              }`}
+                              style={{ width: `${percentage}%` }}
+                            ></div>
+                          </div>
+                        </div>
+                        
+                        {result.subjectScores && (
+                          <div>
+                            <h4 className="font-medium mb-2">Ders Bazında Performans:</h4>
+                            <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
+                              {Object.entries(result.subjectScores).map(([subject, scores]) => {
+                                const scoreData = scores as { correct: number; total: number }
+                                const subjectPercentage = scoreData.total > 0 ? Math.round((scoreData.correct / scoreData.total) * 100) : 0
+                                return (
+                                  <div key={subject} className="flex justify-between items-center p-2 bg-gray-50 rounded">
+                                    <span className="text-sm font-medium">{subject}</span>
+                                    <div className="text-right">
+                                      <div className="text-sm font-bold">{scoreData.correct}/{scoreData.total}</div>
+                                      <div className="text-xs text-gray-600">{subjectPercentage}%</div>
+                                    </div>
+                                  </div>
+                                )
+                              })}
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    </CardContent>
+                  </Card>
+                )
+              })
+            ) : (
+              <Card>
+                <CardContent className="flex flex-col items-center justify-center py-12">
+                  <BookOpen className="h-16 w-16 text-gray-300 mb-4" />
+                  <h3 className="text-lg font-semibold text-gray-600 mb-2">Henüz Sınav Sonucun Yok</h3>
+                  <p className="text-gray-500 text-center max-w-md">
+                    İlk sınavını tamamladığında burada detaylı analizini görebileceksin.
+                  </p>
+                </CardContent>
+              </Card>
+            )}
           </div>
         </TabsContent>
 
@@ -669,15 +789,18 @@ export default function StudentDashboard() {
                           <div>
                             <p className="font-medium mb-2">📚 Ders Performansı:</p>
                             <div className="space-y-1">
-                              {Object.entries(result.subjectScores).map(([subject, scores]) => (
-                                <div key={subject} className="flex justify-between">
-                                  <span>{subject}:</span>
-                                  <span className="font-medium">
-                                    {scores.correct}/{scores.total} ({Math.round((scores.correct / scores.total) * 100)}
-                                    %)
-                                  </span>
-                                </div>
-                              ))}
+                              {Object.entries(result.subjectScores).map(([subject, scores]) => {
+                                const scoreData = scores as { correct: number; total: number }
+                                return (
+                                  <div key={subject} className="flex justify-between">
+                                    <span>{subject}:</span>
+                                    <span className="font-medium">
+                                      {scoreData.correct}/{scoreData.total} ({Math.round((scoreData.correct / scoreData.total) * 100)}
+                                      %)
+                                    </span>
+                                  </div>
+                                )
+                              })}
                             </div>
                           </div>
                         </div>
@@ -880,6 +1003,24 @@ export default function StudentDashboard() {
           </div>
         </TabsContent>
       </Tabs>
+      
+      {selectedExamDetail && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+          <div className="bg-white rounded-lg max-w-6xl w-full max-h-[90vh] overflow-hidden">
+            <div className="flex justify-between items-center p-6 border-b">
+              <h2 className="text-2xl font-bold">
+                {exams.find(e => e.id === selectedExamDetail)?.name} - Detaylı Analiz
+              </h2>
+              <Button variant="outline" onClick={() => setSelectedExamDetail(null)}>
+                Kapat
+              </Button>
+            </div>
+            <div className="overflow-auto max-h-[80vh]">
+              <StudentExamDetail examId={selectedExamDetail} studentId={user.id} />
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }

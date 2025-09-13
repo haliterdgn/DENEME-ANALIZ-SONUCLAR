@@ -9,6 +9,7 @@ interface FormField {
 interface SubjectArea {
   name: string
   start: number
+  end: number
   soruSayisi: number
 }
 
@@ -16,7 +17,8 @@ export interface OptikForm {
   id: string
   formAdi: string
   formKodu: string
-  examId: string
+  examId?: string // optional for backward compatibility
+  examTypeId?: string // new field for exam type
   fields: {
     formAdi: FormField
     formKodu: FormField
@@ -44,6 +46,7 @@ export interface OptikForm {
 interface OptikFormState {
   optikForms: OptikForm[]
   addOptikForm: (form: Omit<OptikForm, "id" | "createdAt">) => void
+  addOptikFormWithId: (form: Omit<OptikForm, "id" | "createdAt">, customId: string) => void
   updateOptikForm: (id: string, updates: Partial<OptikForm>) => void
   deleteOptikForm: (id: string) => void
   getOptikFormByExamId: (examId: string) => OptikForm | undefined
@@ -56,7 +59,7 @@ export const useOptikFormStore = create<OptikFormState>()(
       optikForms: [
         // Örnek veri
         {
-          id: "optik-1",
+          id: "66e5b8c1f1a2b3c4d5e6f7a8",
           formAdi: "2024 Matematik Ara Sınavı Form A",
           formKodu: "MAT2024A",
           examId: "exam-1",
@@ -81,16 +84,31 @@ export const useOptikFormStore = create<OptikFormState>()(
             kt1: { start: 126, end: 127 },
           },
           subjects: [
-            { name: "Cebir", start: 160, soruSayisi: 20 },
-            { name: "Geometri", start: 210, soruSayisi: 15 },
+            { name: "Cebir", start: 160, end: 179, soruSayisi: 20 },
+            { name: "Geometri", start: 210, end: 224, soruSayisi: 15 },
           ],
           createdAt: "2024-01-02T10:00:00Z",
         },
       ],
       addOptikForm: (formData) => {
+        // MongoDB uyumlu ObjectId benzeri 24 karakterlik hex ID oluştur
+        const generateObjectId = () => {
+          const timestamp = Math.floor(Date.now() / 1000).toString(16)
+          const random = Math.random().toString(16).substring(2, 18)
+          return (timestamp + random).padEnd(24, '0').substring(0, 24)
+        }
+        
         const form: OptikForm = {
           ...formData,
-          id: `optik-${Date.now()}`,
+          id: generateObjectId(),
+          createdAt: new Date().toISOString(),
+        }
+        set((state) => ({ optikForms: [...state.optikForms, form] }))
+      },
+      addOptikFormWithId: (formData, customId) => {
+        const form: OptikForm = {
+          ...formData,
+          id: customId,
           createdAt: new Date().toISOString(),
         }
         set((state) => ({ optikForms: [...state.optikForms, form] }))

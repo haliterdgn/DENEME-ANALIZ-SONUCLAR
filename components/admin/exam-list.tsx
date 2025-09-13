@@ -1,16 +1,58 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { useExamStore } from "@/lib/stores/exam-store"
-import { Calendar, Users, FileText, Upload, Eye } from "lucide-react"
+import { Calendar, Users, FileText, Upload, Eye, Trash2 } from "lucide-react"
 import BookletUpload from "./booklet-upload"
+import OptikResultsViewer from "./optik-results-viewer"
+import DetailedExamAnalysis from "./detailed-exam-analysis"
 
 export default function ExamList() {
   const [selectedExam, setSelectedExam] = useState<string | null>(null)
-  const { exams, getBookletByExamId, getResultsByExamId } = useExamStore()
+  const [showResults, setShowResults] = useState<string | null>(null)
+  const [loading, setLoading] = useState(true)
+  const { exams, getBookletByExamId, getResultsByExamId, fetchExams, createExamAPI, deleteExamAPI } = useExamStore()
+
+  useEffect(() => {
+    const loadExams = async () => {
+      try {
+        await fetchExams()
+      } catch (error) {
+        console.warn('Sınavlar offline modda çalışıyor')
+      } finally {
+        setLoading(false)
+      }
+    }
+    
+    loadExams()
+  }, [fetchExams])
+
+  if (loading) {
+    return (
+      <div className="space-y-6">
+        <div className="flex justify-between items-center">
+          <h2 className="text-2xl font-bold">Sınav Yönetimi</h2>
+          <p className="text-gray-600">Sınavlar yükleniyor...</p>
+        </div>
+        <div className="grid gap-4">
+          {[1, 2, 3].map((i) => (
+            <Card key={i} className="animate-pulse">
+              <CardHeader>
+                <div className="h-6 bg-gray-200 rounded w-1/3"></div>
+                <div className="h-4 bg-gray-200 rounded w-1/2 mt-2"></div>
+              </CardHeader>
+              <CardContent>
+                <div className="h-4 bg-gray-200 rounded w-full"></div>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      </div>
+    )
+  }
 
   return (
     <div className="space-y-6">
@@ -19,8 +61,43 @@ export default function ExamList() {
         <p className="text-gray-600">Sınavlar için kitapçık ve optik form yükleyin</p>
       </div>
 
-      <div className="grid gap-6">
-        {exams.map((exam) => {
+      {exams.length === 0 ? (
+        <Card className="border-2 border-dashed border-gray-300">
+          <CardContent className="flex flex-col items-center justify-center py-12">
+            <FileText className="h-16 w-16 text-gray-300 mb-4" />
+            <h3 className="text-xl font-semibold text-gray-600 mb-2">Henüz Sınav Bulunmuyor</h3>
+            <p className="text-gray-500 text-center mb-6 max-w-md">
+              API'den sınav verisi çekilemedi. Yeni bir sınav oluşturmak için "Sınav Oluştur" sekmesini kullanın
+              veya demo sınav oluşturun.
+            </p>
+            <Button 
+              onClick={async () => {
+                try {
+                  await createExamAPI({
+                    name: "Demo Matematik Sınavı",
+                    date: new Date().toISOString().split('T')[0],
+                    classLevel: "9. Sınıf",
+                    subjects: [
+                      { name: "Cebir", questionCount: 25 },
+                      { name: "Geometri", questionCount: 20 }
+                    ],
+                    createdBy: "demo"
+                  })
+                  await fetchExams()
+                } catch (error) {
+                  console.error('Demo sınav oluşturulamadı:', error)
+                }
+              }}
+              className="flex items-center gap-2"
+            >
+              <Upload className="h-4 w-4" />
+              Demo Sınav Oluştur
+            </Button>
+          </CardContent>
+        </Card>
+      ) : (
+        <div className="grid gap-6">
+          {exams.map((exam) => {
           const booklet = getBookletByExamId(exam.id)
           const results = getResultsByExamId(exam.id)
 
@@ -69,11 +146,45 @@ export default function ExamList() {
                     </Button>
 
                     {results.length > 0 && (
-                      <Button variant="outline" size="lg" className="flex items-center gap-2 bg-transparent">
+                      <Button 
+                        variant="outline" 
+                        size="lg" 
+                        className="flex items-center gap-2 bg-transparent"
+                        onClick={() => setShowResults(exam.id)}
+                      >
                         <Eye className="h-5 w-5" />
                         Sonuçları Gör
                       </Button>
                     )}
+
+                    <Button 
+                      variant="destructive" 
+                      size="lg" 
+                      className="flex items-center gap-2"
+                      onClick={async () => {
+                        if (window.confirm(`"${exam.name}" sınavını silmek istediğinizden emin misiniz? Bu işlem geri alınamaz.`)) {
+                          try {
+                            await deleteExamAPI(exam.id)
+                            alert('Sınav başarıyla silindi!')
+                          } catch (error: any) {
+                            console.error('Sınav silinemedi:', error)
+                            // CORS veya network hatalarında da kullanıcıya bilgi ver
+                            if (error.message?.includes('CORS') || 
+                                error.message?.includes('ERR_FAILED') ||
+                                error.message?.includes('Access to fetch')) {
+                              alert('Backend CORS hatası nedeniyle sınav sadece arayüzden silindi. Backend\'de hala mevcut olabilir.')
+                            } else if (error.message?.includes('500')) {
+                              alert('Backend hatası: Sınav sadece arayüzden silindi. Backend loglarını kontrol edin.')
+                            } else {
+                              alert('Beklenmeyen hata: Sınav silinemedi. Lütfen tekrar deneyin.')
+                            }
+                          }
+                        }
+                      }}
+                    >
+                      <Trash2 className="h-4 w-4" />
+                      Sil
+                    </Button>
                   </div>
                 </div>
               </CardHeader>
@@ -83,8 +194,8 @@ export default function ExamList() {
                   <div>
                     <h4 className="font-medium mb-3">📚 Dersler ve Soru Sayıları:</h4>
                     <div className="flex flex-wrap gap-2">
-                      {exam.subjects.map((subject) => (
-                        <Badge key={subject.id} variant="outline" className="px-3 py-1">
+                      {exam.subjects?.map((subject: any, index: number) => (
+                        <Badge key={`${subject.name}-${index}`} variant="outline" className="px-3 py-1">
                           {subject.name} ({subject.questionCount} soru)
                         </Badge>
                       ))}
@@ -167,8 +278,25 @@ export default function ExamList() {
           </Card>
         )}
       </div>
+      )}
 
       {selectedExam && <BookletUpload examId={selectedExam} onClose={() => setSelectedExam(null)} />}
+      
+      {showResults && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+          <div className="bg-white rounded-lg max-w-6xl w-full max-h-[90vh] overflow-hidden">
+            <div className="flex justify-between items-center p-6 border-b">
+              <h2 className="text-2xl font-bold">Sınav Sonuçları - {exams.find(e => e.id === showResults)?.name}</h2>
+              <Button variant="outline" onClick={() => setShowResults(null)}>
+                Kapat
+              </Button>
+            </div>
+            <div className="overflow-auto max-h-[80vh]">
+              <DetailedExamAnalysis examId={showResults} hideClassFilter={true} />
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }

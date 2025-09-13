@@ -1,8 +1,12 @@
 "use client"
 
+import { useState, useEffect } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Button } from "@/components/ui/button"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { useExamStore } from "@/lib/stores/exam-store"
 import { useUserStore } from "@/lib/stores/user-store"
+import { apiClient } from "@/lib/api-client"
 import {
   BarChart,
   Bar,
@@ -21,6 +25,70 @@ import {
 export default function AnalyticsDashboard() {
   const { exams, results } = useExamStore()
   const { users } = useUserStore()
+  const [selectedExam, setSelectedExam] = useState<string>("")
+  const [selectedClass, setSelectedClass] = useState<string>("all")
+  const [examAnalysis, setExamAnalysis] = useState<any>(null)
+  const [studentResults, setStudentResults] = useState<any[]>([])
+  const [loading, setLoading] = useState(false)
+
+  // Seçilen sınav için analiz yap - Analyze Student Results API kullan
+  const handleAnalyzeExam = async () => {
+    if (!selectedExam) return
+    
+    setLoading(true)
+    try {
+      console.log('🔍 Analyze Student Results başlatılıyor, ExamID:', selectedExam)
+      
+      const analysisResult = await apiClient.analyzeExamResults(selectedExam, {
+        includeDetails: true,
+        classFilter: selectedClass || undefined
+      })
+      
+      console.log('✅ Analyze Student Results başarılı:', analysisResult)
+      
+      // Postman collection formatındaki response'u işle
+      if (analysisResult) {
+        // analysisStats kısmını işle
+        if (analysisResult.analysisStats) {
+          setExamAnalysis({
+            averageScore: analysisResult.analysisStats.averageScore || 0,
+            totalStudents: analysisResult.analysisStats.totalStudents || 0,
+            passRate: analysisResult.analysisStats.passCount && analysisResult.analysisStats.totalStudents 
+              ? (analysisResult.analysisStats.passCount / analysisResult.analysisStats.totalStudents) * 100 
+              : 0,
+            highestScore: analysisResult.analysisStats.highestScore || 0,
+            lowestScore: analysisResult.analysisStats.lowestScore || 0,
+            subjectAnalysis: analysisResult.subjectAnalysis || []
+          })
+        }
+
+        // studentResults kısmını işle
+        if (analysisResult.studentResults && analysisResult.studentResults.length > 0) {
+          // API formatından frontend formatına dönüştür
+          const formattedResults = analysisResult.studentResults.map((student: any) => ({
+            studentId: student.studentInfo?.tcKimlikNo || 'unknown',
+            studentName: student.studentInfo?.ogrenciAdi || 'Bilinmeyen Öğrenci',
+            className: student.studentInfo?.sinif || 'Bilinmeyen Sınıf',
+            phone: student.studentInfo?.telefon || '',
+            totalScore: student.totalScore || 0,
+            totalCorrect: student.totalCorrect || 0,
+            totalWrong: student.totalWrong || 0,
+            totalEmpty: student.totalEmpty || 0,
+            subjectScores: student.subjectScores || [],
+            detailedAnswers: student.detailedAnswers || []
+          }))
+          setStudentResults(formattedResults)
+        }
+      }
+    } catch (error) {
+      console.error('❌ Analyze Student Results hatası:', error)
+      // Hata durumunda boş sonuçlar göster
+      setExamAnalysis({ averageScore: 0, totalStudents: 0, passRate: 0 })
+      setStudentResults([])
+    } finally {
+      setLoading(false)
+    }
+  }
 
   // Overall statistics
   const totalStudents = users.filter((u) => u.role === "student").length
@@ -72,8 +140,9 @@ export default function AnalyticsDashboard() {
         if (!acc[subject]) {
           acc[subject] = { correct: 0, total: 0, attempts: 0 }
         }
-        acc[subject].correct += scores.correct
-        acc[subject].total += scores.total
+        const typedScores = scores as { correct: number; total: number }
+        acc[subject].correct += typedScores.correct
+        acc[subject].total += typedScores.total
         acc[subject].attempts++
       })
       return acc
@@ -81,12 +150,15 @@ export default function AnalyticsDashboard() {
     {} as Record<string, { correct: number; total: number; attempts: number }>,
   )
 
-  const subjectData = Object.entries(subjectPerformance).map(([subject, data]) => ({
-    subject: subject.length > 15 ? subject.substring(0, 15) + "..." : subject,
-    percentage: Math.round((data.correct / data.total) * 100),
-    attempts: data.attempts,
-    totalQuestions: data.total,
-  }))
+  const subjectData = Object.entries(subjectPerformance).map(([subject, data]) => {
+    const typedData = data as { correct: number; total: number; attempts: number }
+    return {
+      subject: subject.length > 15 ? subject.substring(0, 15) + "..." : subject,
+      percentage: Math.round((typedData.correct / typedData.total) * 100),
+      attempts: typedData.attempts,
+      totalQuestions: typedData.total,
+    }
+  })
 
   // Monthly performance trend - Aylık performans trendi
   const monthlyData = results.reduce(
@@ -104,11 +176,14 @@ export default function AnalyticsDashboard() {
   )
 
   const trendData = Object.entries(monthlyData)
-    .map(([month, data]) => ({
-      month,
-      averageScore: Math.round(data.scores.reduce((sum, score) => sum + score, 0) / data.scores.length),
-      examCount: data.count,
-    }))
+    .map(([month, data]) => {
+      const typedData = data as { scores: number[]; count: number }
+      return {
+        month,
+        averageScore: Math.round(typedData.scores.reduce((sum, score) => sum + score, 0) / typedData.scores.length),
+        examCount: typedData.count,
+      }
+    })
     .sort((a, b) => new Date(a.month).getTime() - new Date(b.month).getTime())
 
   // Custom tooltip for charts
@@ -137,6 +212,204 @@ export default function AnalyticsDashboard() {
           <p className="text-gray-600 mt-1">Genel performans ve istatistikleri görüntüleyin</p>
         </div>
       </div>
+
+      {/* Sınav Analizi */}
+      <Card className="border-2 border-green-200">
+        <CardHeader className="bg-green-50">
+          <CardTitle className="text-green-800 flex items-center gap-2">
+            🎯 Sınav Analizi
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="pt-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+            <Select onValueChange={setSelectedExam}>
+              <SelectTrigger>
+                <SelectValue placeholder="Sınav seçin" />
+              </SelectTrigger>
+              <SelectContent>
+                {exams.map((exam) => (
+                  <SelectItem key={exam.id} value={exam.id}>
+                    {exam.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            
+            <Button 
+              onClick={handleAnalyzeExam} 
+              disabled={!selectedExam || loading}
+              className="bg-green-600 hover:bg-green-700"
+            >
+              {loading ? '🔄 Analiz yapılıyor...' : '🚀 Analiz Yap'}
+            </Button>
+          </div>
+
+          {/* Gelişmiş Analiz Sonuçları */}
+          {examAnalysis && (
+            <div className="space-y-6">
+              {/* Ana Metrikler */}
+              <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                <Card className="bg-gradient-to-br from-blue-50 to-blue-100 border-blue-200">
+                  <CardContent className="p-4 text-center">
+                    <div className="text-3xl font-bold text-blue-700">
+                      {examAnalysis.averageScore || 0}
+                    </div>
+                    <div className="text-sm text-blue-600 font-medium">Ortalama Puan</div>
+                    <div className="text-xs text-blue-500 mt-1">
+                      {(examAnalysis.averageScore || 0) >= 75 ? '✅ Hedef üstü' : '⚠️ Hedef altı'}
+                    </div>
+                  </CardContent>
+                </Card>
+                
+                <Card className="bg-gradient-to-br from-green-50 to-green-100 border-green-200">
+                  <CardContent className="p-4 text-center">
+                    <div className="text-3xl font-bold text-green-700">
+                      {examAnalysis.totalStudents || 0}
+                    </div>
+                    <div className="text-sm text-green-600 font-medium">Katılan Öğrenci</div>
+                    <div className="text-xs text-green-500 mt-1">
+                      Katılım: %{Math.round(((examAnalysis.totalStudents || 0) / totalStudents) * 100)}
+                    </div>
+                  </CardContent>
+                </Card>
+                
+                <Card className="bg-gradient-to-br from-purple-50 to-purple-100 border-purple-200">
+                  <CardContent className="p-4 text-center">
+                    <div className="text-3xl font-bold text-purple-700">
+                      {examAnalysis.highestScore || 0}
+                    </div>
+                    <div className="text-sm text-purple-600 font-medium">En Yüksek Puan</div>
+                    <div className="text-xs text-purple-500 mt-1">
+                      Fark: {(examAnalysis.highestScore || 0) - (examAnalysis.averageScore || 0)} puan
+                    </div>
+                  </CardContent>
+                </Card>
+
+                <Card className="bg-gradient-to-br from-orange-50 to-orange-100 border-orange-200">
+                  <CardContent className="p-4 text-center">
+                    <div className="text-3xl font-bold text-orange-700">
+                      {examAnalysis.lowestScore || 0}
+                    </div>
+                    <div className="text-sm text-orange-600 font-medium">En Düşük Puan</div>
+                    <div className="text-xs text-orange-500 mt-1">
+                      Fark: {(examAnalysis.averageScore || 0) - (examAnalysis.lowestScore || 0)} puan alt
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
+
+              {/* Ders Bazında Detaylı Analiz */}
+              {examAnalysis.subjectAnalysis && (
+                <Card className="border-2 border-indigo-200">
+                  <CardHeader className="bg-indigo-50">
+                    <CardTitle className="text-indigo-800">📚 Ders Bazında Detaylı Performans</CardTitle>
+                  </CardHeader>
+                  <CardContent className="pt-4">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      {examAnalysis.subjectAnalysis.map((subjectData: any, index: number) => (
+                        <div key={index} className="p-4 bg-gradient-to-r from-gray-50 to-indigo-50 rounded-lg border border-indigo-200">
+                          <div className="flex justify-between items-center mb-2">
+                            <h4 className="font-semibold text-indigo-800">{subjectData.subjectName}</h4>
+                            <span className={`px-2 py-1 rounded text-xs font-bold ${
+                              (subjectData.averageScore || 0) >= 80 ? 'bg-green-100 text-green-800' :
+                              (subjectData.averageScore || 0) >= 60 ? 'bg-yellow-100 text-yellow-800' : 
+                              'bg-red-100 text-red-800'
+                            }`}>
+                              {Math.round(subjectData.averageScore || 0)}
+                            </span>
+                          </div>
+                          <div className="space-y-2">
+                            <div className="flex justify-between text-sm">
+                              <span className="text-green-600">Doğru: {subjectData.totalCorrect || 0}</span>
+                              <span className="text-red-600">Yanlış: {subjectData.totalWrong || 0}</span>
+                              <span className="text-gray-600">Boş: {subjectData.totalEmpty || 0}</span>
+                            </div>
+                            <div className="flex justify-between text-xs text-gray-500">
+                              <span>Soru: {subjectData.totalQuestions || 0}</span>
+                              <span>Öğrenci: {subjectData.studentCount || 0}</span>
+                            </div>
+                            <div className="w-full bg-gray-200 rounded-full h-3">
+                              <div 
+                                className={`h-3 rounded-full transition-all duration-500 ${
+                                  (subjectData.averageScore || 0) >= 80 ? 'bg-green-500' :
+                                  (subjectData.averageScore || 0) >= 60 ? 'bg-yellow-500' : 'bg-red-500'
+                                }`}
+                                style={{ width: `${Math.min(subjectData.averageScore || 0, 100)}%` }}
+                              />
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </CardContent>
+                </Card>
+              )}
+
+
+
+              {/* Gelişmiş Öğrenci Sonuçları */}
+              {studentResults.length > 0 && (
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                      👥 Öğrenci Sonuçları
+                    </CardTitle>
+                    <p className="text-sm text-gray-600">
+                      Toplam {studentResults.length} öğrenci - En iyi 10 gösteriliyor
+                    </p>
+                  </CardHeader>
+                  <CardContent className="pt-4">
+                    <div className="overflow-x-auto">
+                      <table className="w-full border-collapse border border-gray-200">
+                        <thead>
+                          <tr className="bg-gray-50">
+                            <th className="border border-gray-200 p-2 text-left font-semibold">Sıra</th>
+                            <th className="border border-gray-200 p-2 text-left font-semibold">Ad Soyad</th>
+                            <th className="border border-gray-200 p-2 text-left font-semibold">TC Kimlik</th>
+                            <th className="border border-gray-200 p-2 text-left font-semibold">Doğru</th>
+                            <th className="border border-gray-200 p-2 text-left font-semibold">Yanlış</th>
+                            <th className="border border-gray-200 p-2 text-left font-semibold">Boş</th>
+                            <th className="border border-gray-200 p-2 text-left font-semibold">Puan</th>
+                            <th className="border border-gray-200 p-2 text-left font-semibold">Sınıf</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {studentResults
+                            .sort((a, b) => (b.totalScore || 0) - (a.totalScore || 0))
+                            .slice(0, 10)
+                            .map((result, index) => (
+                              <tr key={index} className="hover:bg-gray-50">
+                                <td className="border border-gray-200 p-2">
+                                  {index + 1}
+                                  {index < 3 && (index === 0 ? '🥇' : index === 1 ? '🥈' : '🥉')}
+                                </td>
+                                <td className="border border-gray-200 p-2 font-medium">{result.studentName || 'N/A'}</td>
+                                <td className="border border-gray-200 p-2 text-xs">{result.studentId || 'N/A'}</td>
+                                <td className="border border-gray-200 p-2 text-green-600">{result.totalCorrect || 0}</td>
+                                <td className="border border-gray-200 p-2 text-red-600">{result.totalWrong || 0}</td>
+                                <td className="border border-gray-200 p-2 text-gray-600">{result.totalEmpty || 0}</td>
+                                <td className="border border-gray-200 p-2 font-bold">{result.totalScore || 0}</td>
+                                <td className="border border-gray-200 p-2">{result.className || 'N/A'}</td>
+                              </tr>
+                            ))}
+                        </tbody>
+                      </table>
+                      {studentResults.length > 15 && (
+                        <div className="mt-3 p-3 bg-slate-50 rounded">
+                          <p className="text-sm text-slate-600 text-center">
+                            📊 <strong>{studentResults.length - 15}</strong> öğrenci daha mevcut. 
+                            <span className="ml-2 text-slate-500">Tam liste için detay rapor alın.</span>
+                          </p>
+                        </div>
+                      )}
+                    </div>
+                  </CardContent>
+                </Card>
+              )}
+            </div>
+          )}
+        </CardContent>
+      </Card>
 
       {/* Overview Stats */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -256,33 +529,7 @@ export default function AnalyticsDashboard() {
         </Card>
       </div>
 
-      {/* Subject Performance */}
-      {subjectData.length > 0 && (
-        <Card className="border-2 border-purple-200">
-          <CardHeader className="bg-purple-50">
-            <CardTitle className="flex items-center gap-2 text-purple-800">📚 Ders Performans Analizi</CardTitle>
-            <p className="text-sm text-purple-600">Her dersin genel başarı oranı</p>
-          </CardHeader>
-          <CardContent className="pt-6">
-            <ResponsiveContainer width="100%" height={350}>
-              <BarChart data={subjectData} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#e0e7ff" />
-                <XAxis
-                  dataKey="subject"
-                  fontSize={12}
-                  tick={{ fill: "#7c3aed" }}
-                  angle={-45}
-                  textAnchor="end"
-                  height={80}
-                />
-                <YAxis fontSize={12} tick={{ fill: "#7c3aed" }} domain={[0, 100]} />
-                <Tooltip content={<CustomTooltip />} />
-                <Bar dataKey="percentage" fill="#8b5cf6" radius={[4, 4, 0, 0]} name="Başarı Oranı" />
-              </BarChart>
-            </ResponsiveContainer>
-          </CardContent>
-        </Card>
-      )}
+      
 
       {/* Performance Trend */}
       {trendData.length > 0 && (
@@ -384,87 +631,7 @@ export default function AnalyticsDashboard() {
         </Card>
       </div>
 
-      {/* Summary Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <Card className="border-2 border-red-200">
-          <CardHeader className="bg-red-50">
-            <CardTitle className="text-red-800 text-center">⚠️ Dikkat Gereken Alanlar</CardTitle>
-          </CardHeader>
-          <CardContent className="pt-6">
-            <div className="space-y-3">
-              {subjectData
-                .filter((s) => s.percentage < 60)
-                .sort((a, b) => a.percentage - b.percentage)
-                .slice(0, 3)
-                .map((subject) => (
-                  <div key={subject.subject} className="p-3 bg-red-50 border border-red-200 rounded-lg">
-                    <p className="font-medium text-red-800">{subject.subject}</p>
-                    <p className="text-sm text-red-600">%{subject.percentage} başarı - İyileştirme gerekli</p>
-                  </div>
-                ))}
-              {subjectData.filter((s) => s.percentage < 60).length === 0 && (
-                <p className="text-center text-gray-500 py-4">🎉 Tüm dersler iyi durumda!</p>
-              )}
-            </div>
-          </CardContent>
-        </Card>
 
-        <Card className="border-2 border-yellow-200">
-          <CardHeader className="bg-yellow-50">
-            <CardTitle className="text-yellow-800 text-center">📊 Genel İstatistikler</CardTitle>
-          </CardHeader>
-          <CardContent className="pt-6">
-            <div className="space-y-3 text-sm">
-              <div className="flex justify-between">
-                <span className="text-yellow-700">Toplam Soru:</span>
-                <span className="font-bold">{results.reduce((sum, r) => sum + r.totalQuestions, 0)}</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-yellow-700">Doğru Cevap:</span>
-                <span className="font-bold text-green-600">{results.reduce((sum, r) => sum + r.score, 0)}</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-yellow-700">Yanlış Cevap:</span>
-                <span className="font-bold text-red-600">
-                  {results.reduce((sum, r) => sum + (r.totalQuestions - r.score), 0)}
-                </span>
-              </div>
-              <div className="flex justify-between border-t pt-2">
-                <span className="text-yellow-700">Genel Başarı:</span>
-                <span className="font-bold text-lg">{averageScore}%</span>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card className="border-2 border-indigo-200">
-          <CardHeader className="bg-indigo-50">
-            <CardTitle className="text-indigo-800 text-center">🎯 Hedef ve Öneriler</CardTitle>
-          </CardHeader>
-          <CardContent className="pt-6">
-            <div className="space-y-3 text-sm">
-              <div className="p-2 bg-indigo-50 rounded">
-                <p className="font-medium text-indigo-800">Hedef Ortalama: 75%</p>
-                <p className="text-indigo-600">
-                  Mevcut: {averageScore}%{averageScore >= 75 ? " ✅" : ` (${75 - averageScore}% eksik)`}
-                </p>
-              </div>
-              <div className="p-2 bg-indigo-50 rounded">
-                <p className="font-medium text-indigo-800">Öneri:</p>
-                <p className="text-indigo-600">
-                  {averageScore >= 80
-                    ? "Mükemmel performans! Devam edin."
-                    : averageScore >= 70
-                      ? "İyi gidiyor, biraz daha çalışma gerekli."
-                      : averageScore >= 60
-                        ? "Orta seviye, daha fazla pratik yapın."
-                        : "Ciddi çalışma gerekli, öğretmenlerle görüşün."}
-                </p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
     </div>
   )
 }

@@ -9,6 +9,7 @@ const nextConfig = {
   images: {
     unoptimized: true,
   },
+  reactStrictMode: false, // Console noise'unu azaltmak için
 }
 
 export default nextConfig

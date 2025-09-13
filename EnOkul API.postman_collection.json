@@ -1,0 +1,4013 @@
+{
+	"info": {
+		"_postman_id": "9d3ddfa0-cfeb-4c4c-a41c-68c5c9c5f7f4",
+		"name": "EnOkul API",
+		"description": "Automatically generated OpenAPI spec (swagger-autogen)",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "42782731",
+		"_collection_link": "https://jokeryazilim.postman.co/workspace/Bekta%C5%9F-%C5%9EAH%C4%B0N~7f46da7a-3adf-475c-8f3e-615bc6735691/collection/8224163-9d3ddfa0-cfeb-4c4c-a41c-68c5c9c5f7f4?action=share&source=collection_link&creator=42782731"
+	},
+	"item": [
+		{
+			"name": "/",
+			"item": [
+				{
+					"name": "/",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								""
+							]
+						}
+					},
+					"response": [
+						{
+							"name": "Created",
+							"originalRequest": {
+								"method": "POST",
+								"header": [],
+								"url": {
+									"raw": "{{baseUrl}}/",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										""
+									]
+								}
+							},
+							"status": "Created",
+							"code": 201,
+							"_postman_previewlanguage": "text",
+							"header": [],
+							"cookie": [],
+							"body": ""
+						},
+						{
+							"name": "Bad Request",
+							"originalRequest": {
+								"method": "POST",
+								"header": [],
+								"url": {
+									"raw": "{{baseUrl}}/",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										""
+									]
+								}
+							},
+							"status": "Bad Request",
+							"code": 400,
+							"_postman_previewlanguage": "text",
+							"header": [],
+							"cookie": [],
+							"body": ""
+						}
+					]
+				},
+				{
+					"name": "/",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								""
+							]
+						}
+					},
+					"response": [
+						{
+							"name": "OK",
+							"originalRequest": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{baseUrl}}/",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										""
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "text",
+							"header": [],
+							"cookie": [],
+							"body": ""
+						},
+						{
+							"name": "Internal Server Error",
+							"originalRequest": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{baseUrl}}/",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										""
+									]
+								}
+							},
+							"status": "Internal Server Error",
+							"code": 500,
+							"_postman_previewlanguage": "text",
+							"header": [],
+							"cookie": [],
+							"body": ""
+						}
+					]
+				}
+			]
+		},
+		{
+			"name": "{id}",
+			"item": [
+				{
+					"name": "upload-excel",
+					"item": [
+						{
+							"name": "/:id/upload-excel",
+							"request": {
+								"method": "POST",
+								"header": [],
+								"url": {
+									"raw": "{{baseUrl}}/:id/upload-excel",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										":id",
+										"upload-excel"
+									],
+									"variable": [
+										{
+											"key": "id",
+											"value": "<string>",
+											"description": "(Required) "
+										}
+									]
+								}
+							},
+							"response": [
+								{
+									"name": "Created",
+									"originalRequest": {
+										"method": "POST",
+										"header": [],
+										"url": {
+											"raw": "{{baseUrl}}/:id/upload-excel",
+											"host": [
+												"{{baseUrl}}"
+											],
+											"path": [
+												":id",
+												"upload-excel"
+											],
+											"variable": [
+												{
+													"key": "id"
+												}
+											]
+										}
+									},
+									"status": "Created",
+									"code": 201,
+									"_postman_previewlanguage": "text",
+									"header": [],
+									"cookie": [],
+									"body": ""
+								},
+								{
+									"name": "Bad Request",
+									"originalRequest": {
+										"method": "POST",
+										"header": [],
+										"url": {
+											"raw": "{{baseUrl}}/:id/upload-excel",
+											"host": [
+												"{{baseUrl}}"
+											],
+											"path": [
+												":id",
+												"upload-excel"
+											],
+											"variable": [
+												{
+													"key": "id"
+												}
+											]
+										}
+									},
+									"status": "Bad Request",
+									"code": 400,
+									"_postman_previewlanguage": "text",
+									"header": [],
+									"cookie": [],
+									"body": ""
+								},
+								{
+									"name": "Internal Server Error",
+									"originalRequest": {
+										"method": "POST",
+										"header": [],
+										"url": {
+											"raw": "{{baseUrl}}/:id/upload-excel",
+											"host": [
+												"{{baseUrl}}"
+											],
+											"path": [
+												":id",
+												"upload-excel"
+											],
+											"variable": [
+												{
+													"key": "id"
+												}
+											]
+										}
+									},
+									"status": "Internal Server Error",
+									"code": 500,
+									"_postman_previewlanguage": "text",
+									"header": [],
+									"cookie": [],
+									"body": ""
+								}
+							]
+						}
+					]
+				},
+				{
+					"name": "/:id",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/:id",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "<string>",
+									"description": "(Required) "
+								}
+							]
+						}
+					},
+					"response": [
+						{
+							"name": "OK",
+							"originalRequest": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{baseUrl}}/:id",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										":id"
+									],
+									"variable": [
+										{
+											"key": "id"
+										}
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "text",
+							"header": [],
+							"cookie": [],
+							"body": ""
+						},
+						{
+							"name": "Not Found",
+							"originalRequest": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{baseUrl}}/:id",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										":id"
+									],
+									"variable": [
+										{
+											"key": "id"
+										}
+									]
+								}
+							},
+							"status": "Not Found",
+							"code": 404,
+							"_postman_previewlanguage": "text",
+							"header": [],
+							"cookie": [],
+							"body": ""
+						},
+						{
+							"name": "Internal Server Error",
+							"originalRequest": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{baseUrl}}/:id",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										":id"
+									],
+									"variable": [
+										{
+											"key": "id"
+										}
+									]
+								}
+							},
+							"status": "Internal Server Error",
+							"code": 500,
+							"_postman_previewlanguage": "text",
+							"header": [],
+							"cookie": [],
+							"body": ""
+						}
+					]
+				},
+				{
+					"name": "/:id",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/:id",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "<string>",
+									"description": "(Required) "
+								}
+							]
+						}
+					},
+					"response": [
+						{
+							"name": "OK",
+							"originalRequest": {
+								"method": "PUT",
+								"header": [],
+								"url": {
+									"raw": "{{baseUrl}}/:id",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										":id"
+									],
+									"variable": [
+										{
+											"key": "id"
+										}
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "text",
+							"header": [],
+							"cookie": [],
+							"body": ""
+						},
+						{
+							"name": "Bad Request",
+							"originalRequest": {
+								"method": "PUT",
+								"header": [],
+								"url": {
+									"raw": "{{baseUrl}}/:id",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										":id"
+									],
+									"variable": [
+										{
+											"key": "id"
+										}
+									]
+								}
+							},
+							"status": "Bad Request",
+							"code": 400,
+							"_postman_previewlanguage": "text",
+							"header": [],
+							"cookie": [],
+							"body": ""
+						},
+						{
+							"name": "Not Found",
+							"originalRequest": {
+								"method": "PUT",
+								"header": [],
+								"url": {
+									"raw": "{{baseUrl}}/:id",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										":id"
+									],
+									"variable": [
+										{
+											"key": "id"
+										}
+									]
+								}
+							},
+							"status": "Not Found",
+							"code": 404,
+							"_postman_previewlanguage": "text",
+							"header": [],
+							"cookie": [],
+							"body": ""
+						}
+					]
+				},
+				{
+					"name": "/:id",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/:id",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "<string>",
+									"description": "(Required) "
+								}
+							]
+						}
+					},
+					"response": [
+						{
+							"name": "OK",
+							"originalRequest": {
+								"method": "DELETE",
+								"header": [],
+								"url": {
+									"raw": "{{baseUrl}}/:id",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										":id"
+									],
+									"variable": [
+										{
+											"key": "id"
+										}
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "text",
+							"header": [],
+							"cookie": [],
+							"body": ""
+						},
+						{
+							"name": "Not Found",
+							"originalRequest": {
+								"method": "DELETE",
+								"header": [],
+								"url": {
+									"raw": "{{baseUrl}}/:id",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										":id"
+									],
+									"variable": [
+										{
+											"key": "id"
+										}
+									]
+								}
+							},
+							"status": "Not Found",
+							"code": 404,
+							"_postman_previewlanguage": "text",
+							"header": [],
+							"cookie": [],
+							"body": ""
+						},
+						{
+							"name": "Internal Server Error",
+							"originalRequest": {
+								"method": "DELETE",
+								"header": [],
+								"url": {
+									"raw": "{{baseUrl}}/:id",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										":id"
+									],
+									"variable": [
+										{
+											"key": "id"
+										}
+									]
+								}
+							},
+							"status": "Internal Server Error",
+							"code": 500,
+							"_postman_previewlanguage": "text",
+							"header": [],
+							"cookie": [],
+							"body": ""
+						}
+					]
+				}
+			]
+		},
+		{
+			"name": "by-exam-type",
+			"item": [
+				{
+					"name": "{examTypeId}",
+					"item": [
+						{
+							"name": "/by-exam-type/:examTypeId",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{baseUrl}}/by-exam-type/:examTypeId",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"by-exam-type",
+										":examTypeId"
+									],
+									"variable": [
+										{
+											"key": "examTypeId",
+											"value": "<string>",
+											"description": "(Required) "
+										}
+									]
+								}
+							},
+							"response": [
+								{
+									"name": "OK",
+									"originalRequest": {
+										"method": "GET",
+										"header": [],
+										"url": {
+											"raw": "{{baseUrl}}/by-exam-type/:examTypeId",
+											"host": [
+												"{{baseUrl}}"
+											],
+											"path": [
+												"by-exam-type",
+												":examTypeId"
+											],
+											"variable": [
+												{
+													"key": "examTypeId"
+												}
+											]
+										}
+									},
+									"status": "OK",
+									"code": 200,
+									"_postman_previewlanguage": "text",
+									"header": [],
+									"cookie": [],
+									"body": ""
+								},
+								{
+									"name": "Not Found",
+									"originalRequest": {
+										"method": "GET",
+										"header": [],
+										"url": {
+											"raw": "{{baseUrl}}/by-exam-type/:examTypeId",
+											"host": [
+												"{{baseUrl}}"
+											],
+											"path": [
+												"by-exam-type",
+												":examTypeId"
+											],
+											"variable": [
+												{
+													"key": "examTypeId"
+												}
+											]
+										}
+									},
+									"status": "Not Found",
+									"code": 404,
+									"_postman_previewlanguage": "text",
+									"header": [],
+									"cookie": [],
+									"body": ""
+								},
+								{
+									"name": "Internal Server Error",
+									"originalRequest": {
+										"method": "GET",
+										"header": [],
+										"url": {
+											"raw": "{{baseUrl}}/by-exam-type/:examTypeId",
+											"host": [
+												"{{baseUrl}}"
+											],
+											"path": [
+												"by-exam-type",
+												":examTypeId"
+											],
+											"variable": [
+												{
+													"key": "examTypeId"
+												}
+											]
+										}
+									},
+									"status": "Internal Server Error",
+									"code": 500,
+									"_postman_previewlanguage": "text",
+									"header": [],
+									"cookie": [],
+									"body": ""
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"name": "swagger-test",
+			"item": [
+				{
+					"name": "/swagger-test",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/swagger-test",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"swagger-test"
+							]
+						}
+					},
+					"response": [
+						{
+							"name": "OK",
+							"originalRequest": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{baseUrl}}/swagger-test",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"swagger-test"
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "text",
+							"header": [],
+							"cookie": [],
+							"body": ""
+						}
+					]
+				}
+			]
+		},
+		{
+			"name": "api-docs.json",
+			"item": [
+				{
+					"name": "/api-docs.json",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api-docs.json",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api-docs.json"
+							]
+						}
+					},
+					"response": [
+						{
+							"name": "OK",
+							"originalRequest": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{baseUrl}}/api-docs.json",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"api-docs.json"
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "text",
+							"header": [],
+							"cookie": [],
+							"body": ""
+						}
+					]
+				}
+			]
+		},
+		{
+			"name": "api",
+			"item": [
+				{
+					"name": "auth",
+					"item": [
+						{
+							"name": "login",
+							"item": [
+								{
+									"name": "/api/auth/login",
+									"request": {
+										"method": "POST",
+										"header": [
+											{
+												"key": "Content-Type",
+												"value": "application/json"
+											}
+										],
+										"body": {
+											"mode": "raw",
+											"raw": "{\n  \"username\": {\n    \"example\": \"any\"\n  },\n  \"password\": {\n    \"example\": \"any\"\n  }\n}",
+											"options": {
+												"raw": {
+													"headerFamily": "json",
+													"language": "json"
+												}
+											}
+										},
+										"url": {
+											"raw": "{{baseUrl}}/api/auth/login",
+											"host": [
+												"{{baseUrl}}"
+											],
+											"path": [
+												"api",
+												"auth",
+												"login"
+											]
+										}
+									},
+									"response": [
+										{
+											"name": "OK",
+											"originalRequest": {
+												"method": "POST",
+												"header": [
+													{
+														"key": "Content-Type",
+														"value": "application/json"
+													}
+												],
+												"body": {
+													"mode": "raw",
+													"raw": "{\n  \"username\": {\n    \"example\": \"any\"\n  },\n  \"password\": {\n    \"example\": \"any\"\n  }\n}",
+													"options": {
+														"raw": {
+															"headerFamily": "json",
+															"language": "json"
+														}
+													}
+												},
+												"url": {
+													"raw": "{{baseUrl}}/api/auth/login",
+													"host": [
+														"{{baseUrl}}"
+													],
+													"path": [
+														"api",
+														"auth",
+														"login"
+													]
+												}
+											},
+											"status": "OK",
+											"code": 200,
+											"_postman_previewlanguage": "text",
+											"header": [],
+											"cookie": [],
+											"body": ""
+										},
+										{
+											"name": "Unauthorized",
+											"originalRequest": {
+												"method": "POST",
+												"header": [
+													{
+														"key": "Content-Type",
+														"value": "application/json"
+													}
+												],
+												"body": {
+													"mode": "raw",
+													"raw": "{\n  \"username\": {\n    \"example\": \"any\"\n  },\n  \"password\": {\n    \"example\": \"any\"\n  }\n}",
+													"options": {
+														"raw": {
+															"headerFamily": "json",
+															"language": "json"
+														}
+													}
+												},
+												"url": {
+													"raw": "{{baseUrl}}/api/auth/login",
+													"host": [
+														"{{baseUrl}}"
+													],
+													"path": [
+														"api",
+														"auth",
+														"login"
+													]
+												}
+											},
+											"status": "Unauthorized",
+											"code": 401,
+											"_postman_previewlanguage": "text",
+											"header": [],
+											"cookie": [],
+											"body": ""
+										}
+									]
+								}
+							]
+						}
+					]
+				},
+				{
+					"name": "users",
+					"item": [
+						{
+							"name": "{id}",
+							"item": [
+								{
+									"name": "/api/users/:id",
+									"request": {
+										"method": "GET",
+										"header": [],
+										"url": {
+											"raw": "{{baseUrl}}/api/users/:id",
+											"host": [
+												"{{baseUrl}}"
+											],
+											"path": [
+												"api",
+												"users",
+												":id"
+											],
+											"variable": [
+												{
+													"key": "id",
+													"value": "<string>",
+													"description": "(Required) "
+												}
+											]
+										}
+									},
+									"response": [
+										{
+											"name": "OK",
+											"originalRequest": {
+												"method": "GET",
+												"header": [],
+												"url": {
+													"raw": "{{baseUrl}}/api/users/:id",
+													"host": [
+														"{{baseUrl}}"
+													],
+													"path": [
+														"api",
+														"users",
+														":id"
+													],
+													"variable": [
+														{
+															"key": "id"
+														}
+													]
+												}
+											},
+											"status": "OK",
+											"code": 200,
+											"_postman_previewlanguage": "text",
+											"header": [],
+											"cookie": [],
+											"body": ""
+										},
+										{
+											"name": "Not Found",
+											"originalRequest": {
+												"method": "GET",
+												"header": [],
+												"url": {
+													"raw": "{{baseUrl}}/api/users/:id",
+													"host": [
+														"{{baseUrl}}"
+													],
+													"path": [
+														"api",
+														"users",
+														":id"
+													],
+													"variable": [
+														{
+															"key": "id"
+														}
+													]
+												}
+											},
+											"status": "Not Found",
+											"code": 404,
+											"_postman_previewlanguage": "text",
+											"header": [],
+											"cookie": [],
+											"body": ""
+										},
+										{
+											"name": "Internal Server Error",
+											"originalRequest": {
+												"method": "GET",
+												"header": [],
+												"url": {
+													"raw": "{{baseUrl}}/api/users/:id",
+													"host": [
+														"{{baseUrl}}"
+													],
+													"path": [
+														"api",
+														"users",
+														":id"
+													],
+													"variable": [
+														{
+															"key": "id"
+														}
+													]
+												}
+											},
+											"status": "Internal Server Error",
+											"code": 500,
+											"_postman_previewlanguage": "text",
+											"header": [],
+											"cookie": [],
+											"body": ""
+										}
+									]
+								},
+								{
+									"name": "/api/users/:id",
+									"request": {
+										"method": "PUT",
+										"header": [],
+										"url": {
+											"raw": "{{baseUrl}}/api/users/:id",
+											"host": [
+												"{{baseUrl}}"
+											],
+											"path": [
+												"api",
+												"users",
+												":id"
+											],
+											"variable": [
+												{
+													"key": "id",
+													"value": "<string>",
+													"description": "(Required) "
+												}
+											]
+										}
+									},
+									"response": [
+										{
+											"name": "OK",
+											"originalRequest": {
+												"method": "PUT",
+												"header": [],
+												"url": {
+													"raw": "{{baseUrl}}/api/users/:id",
+													"host": [
+														"{{baseUrl}}"
+													],
+													"path": [
+														"api",
+														"users",
+														":id"
+													],
+													"variable": [
+														{
+															"key": "id"
+														}
+													]
+												}
+											},
+											"status": "OK",
+											"code": 200,
+											"_postman_previewlanguage": "text",
+											"header": [],
+											"cookie": [],
+											"body": ""
+										},
+										{
+											"name": "Bad Request",
+											"originalRequest": {
+												"method": "PUT",
+												"header": [],
+												"url": {
+													"raw": "{{baseUrl}}/api/users/:id",
+													"host": [
+														"{{baseUrl}}"
+													],
+													"path": [
+														"api",
+														"users",
+														":id"
+													],
+													"variable": [
+														{
+															"key": "id"
+														}
+													]
+												}
+											},
+											"status": "Bad Request",
+											"code": 400,
+											"_postman_previewlanguage": "text",
+											"header": [],
+											"cookie": [],
+											"body": ""
+										},
+										{
+											"name": "Not Found",
+											"originalRequest": {
+												"method": "PUT",
+												"header": [],
+												"url": {
+													"raw": "{{baseUrl}}/api/users/:id",
+													"host": [
+														"{{baseUrl}}"
+													],
+													"path": [
+														"api",
+														"users",
+														":id"
+													],
+													"variable": [
+														{
+															"key": "id"
+														}
+													]
+												}
+											},
+											"status": "Not Found",
+											"code": 404,
+											"_postman_previewlanguage": "text",
+											"header": [],
+											"cookie": [],
+											"body": ""
+										}
+									]
+								},
+								{
+									"name": "/api/users/:id",
+									"request": {
+										"method": "DELETE",
+										"header": [],
+										"url": {
+											"raw": "{{baseUrl}}/api/users/:id",
+											"host": [
+												"{{baseUrl}}"
+											],
+											"path": [
+												"api",
+												"users",
+												":id"
+											],
+											"variable": [
+												{
+													"key": "id",
+													"value": "<string>",
+													"description": "(Required) "
+												}
+											]
+										}
+									},
+									"response": [
+										{
+											"name": "OK",
+											"originalRequest": {
+												"method": "DELETE",
+												"header": [],
+												"url": {
+													"raw": "{{baseUrl}}/api/users/:id",
+													"host": [
+														"{{baseUrl}}"
+													],
+													"path": [
+														"api",
+														"users",
+														":id"
+													],
+													"variable": [
+														{
+															"key": "id"
+														}
+													]
+												}
+											},
+											"status": "OK",
+											"code": 200,
+											"_postman_previewlanguage": "text",
+											"header": [],
+											"cookie": [],
+											"body": ""
+										},
+										{
+											"name": "Not Found",
+											"originalRequest": {
+												"method": "DELETE",
+												"header": [],
+												"url": {
+													"raw": "{{baseUrl}}/api/users/:id",
+													"host": [
+														"{{baseUrl}}"
+													],
+													"path": [
+														"api",
+														"users",
+														":id"
+													],
+													"variable": [
+														{
+															"key": "id"
+														}
+													]
+												}
+											},
+											"status": "Not Found",
+											"code": 404,
+											"_postman_previewlanguage": "text",
+											"header": [],
+											"cookie": [],
+											"body": ""
+										},
+										{
+											"name": "Internal Server Error",
+											"originalRequest": {
+												"method": "DELETE",
+												"header": [],
+												"url": {
+													"raw": "{{baseUrl}}/api/users/:id",
+													"host": [
+														"{{baseUrl}}"
+													],
+													"path": [
+														"api",
+														"users",
+														":id"
+													],
+													"variable": [
+														{
+															"key": "id"
+														}
+													]
+												}
+											},
+											"status": "Internal Server Error",
+											"code": 500,
+											"_postman_previewlanguage": "text",
+											"header": [],
+											"cookie": [],
+											"body": ""
+										}
+									]
+								}
+							]
+						},
+						{
+							"name": "/api/users/",
+							"request": {
+								"method": "POST",
+								"header": [],
+								"url": {
+									"raw": "{{baseUrl}}/api/users/",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"api",
+										"users",
+										""
+									]
+								}
+							},
+							"response": [
+								{
+									"name": "Created",
+									"originalRequest": {
+										"method": "POST",
+										"header": [],
+										"url": {
+											"raw": "{{baseUrl}}/api/users/",
+											"host": [
+												"{{baseUrl}}"
+											],
+											"path": [
+												"api",
+												"users",
+												""
+											]
+										}
+									},
+									"status": "Created",
+									"code": 201,
+									"_postman_previewlanguage": "text",
+									"header": [],
+									"cookie": [],
+									"body": ""
+								},
+								{
+									"name": "Bad Request",
+									"originalRequest": {
+										"method": "POST",
+										"header": [],
+										"url": {
+											"raw": "{{baseUrl}}/api/users/",
+											"host": [
+												"{{baseUrl}}"
+											],
+											"path": [
+												"api",
+												"users",
+												""
+											]
+										}
+									},
+									"status": "Bad Request",
+									"code": 400,
+									"_postman_previewlanguage": "text",
+									"header": [],
+									"cookie": [],
+									"body": ""
+								}
+							]
+						},
+						{
+							"name": "/api/users/",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{baseUrl}}/api/users/",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"api",
+										"users",
+										""
+									]
+								}
+							},
+							"response": [
+								{
+									"name": "OK",
+									"originalRequest": {
+										"method": "GET",
+										"header": [],
+										"url": {
+											"raw": "{{baseUrl}}/api/users/",
+											"host": [
+												"{{baseUrl}}"
+											],
+											"path": [
+												"api",
+												"users",
+												""
+											]
+										}
+									},
+									"status": "OK",
+									"code": 200,
+									"_postman_previewlanguage": "text",
+									"header": [],
+									"cookie": [],
+									"body": ""
+								},
+								{
+									"name": "Internal Server Error",
+									"originalRequest": {
+										"method": "GET",
+										"header": [],
+										"url": {
+											"raw": "{{baseUrl}}/api/users/",
+											"host": [
+												"{{baseUrl}}"
+											],
+											"path": [
+												"api",
+												"users",
+												""
+											]
+										}
+									},
+									"status": "Internal Server Error",
+									"code": 500,
+									"_postman_previewlanguage": "text",
+									"header": [],
+									"cookie": [],
+									"body": ""
+								}
+							]
+						}
+					]
+				},
+				{
+					"name": "exam-types",
+					"item": [
+						{
+							"name": "{id}",
+							"item": [
+								{
+									"name": "/api/exam-types/:id",
+									"request": {
+										"method": "GET",
+										"header": [],
+										"url": {
+											"raw": "{{baseUrl}}/api/exam-types/:id",
+											"host": [
+												"{{baseUrl}}"
+											],
+											"path": [
+												"api",
+												"exam-types",
+												":id"
+											],
+											"variable": [
+												{
+													"key": "id",
+													"value": "<string>",
+													"description": "(Required) "
+												}
+											]
+										}
+									},
+									"response": [
+										{
+											"name": "OK",
+											"originalRequest": {
+												"method": "GET",
+												"header": [],
+												"url": {
+													"raw": "{{baseUrl}}/api/exam-types/:id",
+													"host": [
+														"{{baseUrl}}"
+													],
+													"path": [
+														"api",
+														"exam-types",
+														":id"
+													],
+													"variable": [
+														{
+															"key": "id"
+														}
+													]
+												}
+											},
+											"status": "OK",
+											"code": 200,
+											"_postman_previewlanguage": "text",
+											"header": [],
+											"cookie": [],
+											"body": ""
+										},
+										{
+											"name": "Not Found",
+											"originalRequest": {
+												"method": "GET",
+												"header": [],
+												"url": {
+													"raw": "{{baseUrl}}/api/exam-types/:id",
+													"host": [
+														"{{baseUrl}}"
+													],
+													"path": [
+														"api",
+														"exam-types",
+														":id"
+													],
+													"variable": [
+														{
+															"key": "id"
+														}
+													]
+												}
+											},
+											"status": "Not Found",
+											"code": 404,
+											"_postman_previewlanguage": "text",
+											"header": [],
+											"cookie": [],
+											"body": ""
+										},
+										{
+											"name": "Internal Server Error",
+											"originalRequest": {
+												"method": "GET",
+												"header": [],
+												"url": {
+													"raw": "{{baseUrl}}/api/exam-types/:id",
+													"host": [
+														"{{baseUrl}}"
+													],
+													"path": [
+														"api",
+														"exam-types",
+														":id"
+													],
+													"variable": [
+														{
+															"key": "id"
+														}
+													]
+												}
+											},
+											"status": "Internal Server Error",
+											"code": 500,
+											"_postman_previewlanguage": "text",
+											"header": [],
+											"cookie": [],
+											"body": ""
+										}
+									]
+								},
+								{
+									"name": "/api/exam-types/:id",
+									"request": {
+										"method": "PUT",
+										"header": [],
+										"url": {
+											"raw": "{{baseUrl}}/api/exam-types/:id",
+											"host": [
+												"{{baseUrl}}"
+											],
+											"path": [
+												"api",
+												"exam-types",
+												":id"
+											],
+											"variable": [
+												{
+													"key": "id",
+													"value": "<string>",
+													"description": "(Required) "
+												}
+											]
+										}
+									},
+									"response": [
+										{
+											"name": "OK",
+											"originalRequest": {
+												"method": "PUT",
+												"header": [],
+												"url": {
+													"raw": "{{baseUrl}}/api/exam-types/:id",
+													"host": [
+														"{{baseUrl}}"
+													],
+													"path": [
+														"api",
+														"exam-types",
+														":id"
+													],
+													"variable": [
+														{
+															"key": "id"
+														}
+													]
+												}
+											},
+											"status": "OK",
+											"code": 200,
+											"_postman_previewlanguage": "text",
+											"header": [],
+											"cookie": [],
+											"body": ""
+										},
+										{
+											"name": "Bad Request",
+											"originalRequest": {
+												"method": "PUT",
+												"header": [],
+												"url": {
+													"raw": "{{baseUrl}}/api/exam-types/:id",
+													"host": [
+														"{{baseUrl}}"
+													],
+													"path": [
+														"api",
+														"exam-types",
+														":id"
+													],
+													"variable": [
+														{
+															"key": "id"
+														}
+													]
+												}
+											},
+											"status": "Bad Request",
+											"code": 400,
+											"_postman_previewlanguage": "text",
+											"header": [],
+											"cookie": [],
+											"body": ""
+										},
+										{
+											"name": "Not Found",
+											"originalRequest": {
+												"method": "PUT",
+												"header": [],
+												"url": {
+													"raw": "{{baseUrl}}/api/exam-types/:id",
+													"host": [
+														"{{baseUrl}}"
+													],
+													"path": [
+														"api",
+														"exam-types",
+														":id"
+													],
+													"variable": [
+														{
+															"key": "id"
+														}
+													]
+												}
+											},
+											"status": "Not Found",
+											"code": 404,
+											"_postman_previewlanguage": "text",
+											"header": [],
+											"cookie": [],
+											"body": ""
+										}
+									]
+								},
+								{
+									"name": "/api/exam-types/:id",
+									"request": {
+										"method": "DELETE",
+										"header": [],
+										"url": {
+											"raw": "{{baseUrl}}/api/exam-types/:id",
+											"host": [
+												"{{baseUrl}}"
+											],
+											"path": [
+												"api",
+												"exam-types",
+												":id"
+											],
+											"variable": [
+												{
+													"key": "id",
+													"value": "<string>",
+													"description": "(Required) "
+												}
+											]
+										}
+									},
+									"response": [
+										{
+											"name": "OK",
+											"originalRequest": {
+												"method": "DELETE",
+												"header": [],
+												"url": {
+													"raw": "{{baseUrl}}/api/exam-types/:id",
+													"host": [
+														"{{baseUrl}}"
+													],
+													"path": [
+														"api",
+														"exam-types",
+														":id"
+													],
+													"variable": [
+														{
+															"key": "id"
+														}
+													]
+												}
+											},
+											"status": "OK",
+											"code": 200,
+											"_postman_previewlanguage": "text",
+											"header": [],
+											"cookie": [],
+											"body": ""
+										},
+										{
+											"name": "Not Found",
+											"originalRequest": {
+												"method": "DELETE",
+												"header": [],
+												"url": {
+													"raw": "{{baseUrl}}/api/exam-types/:id",
+													"host": [
+														"{{baseUrl}}"
+													],
+													"path": [
+														"api",
+														"exam-types",
+														":id"
+													],
+													"variable": [
+														{
+															"key": "id"
+														}
+													]
+												}
+											},
+											"status": "Not Found",
+											"code": 404,
+											"_postman_previewlanguage": "text",
+											"header": [],
+											"cookie": [],
+											"body": ""
+										},
+										{
+											"name": "Internal Server Error",
+											"originalRequest": {
+												"method": "DELETE",
+												"header": [],
+												"url": {
+													"raw": "{{baseUrl}}/api/exam-types/:id",
+													"host": [
+														"{{baseUrl}}"
+													],
+													"path": [
+														"api",
+														"exam-types",
+														":id"
+													],
+													"variable": [
+														{
+															"key": "id"
+														}
+													]
+												}
+											},
+											"status": "Internal Server Error",
+											"code": 500,
+											"_postman_previewlanguage": "text",
+											"header": [],
+											"cookie": [],
+											"body": ""
+										}
+									]
+								}
+							]
+						},
+						{
+							"name": "/api/exam-types/",
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"typeName\" : \"LGS\",\n  \"subjects\" : [\n    {\n        \"name\" : \"TÜRKÇE\",\n        \"questionCount\" : 15\n    },\n    {\n        \"name\" : \"SOSYAL\",\n        \"questionCount\" : 10\n    },\n    {\n        \"name\" : \"DİN\",\n        \"questionCount\" : 10\n    },\n    {\n        \"name\" : \"İNGİLİZCE\",\n        \"questionCount\" : 10\n    },\n    {\n        \"name\" : \"MATEMATİK\",\n        \"questionCount\" : 15\n    },\n    {\n        \"name\" : \"FEN\",\n        \"questionCount\" : 15\n    }\n  ]\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{baseUrl}}/api/exam-types/",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"api",
+										"exam-types",
+										""
+									]
+								}
+							},
+							"response": [
+								{
+									"name": "Created",
+									"originalRequest": {
+										"method": "POST",
+										"header": [],
+										"url": {
+											"raw": "{{baseUrl}}/api/exam-types/",
+											"host": [
+												"{{baseUrl}}"
+											],
+											"path": [
+												"api",
+												"exam-types",
+												""
+											]
+										}
+									},
+									"status": "Created",
+									"code": 201,
+									"_postman_previewlanguage": "text",
+									"header": [],
+									"cookie": [],
+									"body": ""
+								},
+								{
+									"name": "Bad Request",
+									"originalRequest": {
+										"method": "POST",
+										"header": [],
+										"url": {
+											"raw": "{{baseUrl}}/api/exam-types/",
+											"host": [
+												"{{baseUrl}}"
+											],
+											"path": [
+												"api",
+												"exam-types",
+												""
+											]
+										}
+									},
+									"status": "Bad Request",
+									"code": 400,
+									"_postman_previewlanguage": "text",
+									"header": [],
+									"cookie": [],
+									"body": ""
+								}
+							]
+						},
+						{
+							"name": "/api/exam-types/",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{baseUrl}}/api/exam-types/",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"api",
+										"exam-types",
+										""
+									]
+								}
+							},
+							"response": [
+								{
+									"name": "OK",
+									"originalRequest": {
+										"method": "GET",
+										"header": [],
+										"url": {
+											"raw": "{{baseUrl}}/api/exam-types/",
+											"host": [
+												"{{baseUrl}}"
+											],
+											"path": [
+												"api",
+												"exam-types",
+												""
+											]
+										}
+									},
+									"status": "OK",
+									"code": 200,
+									"_postman_previewlanguage": "text",
+									"header": [],
+									"cookie": [],
+									"body": ""
+								},
+								{
+									"name": "Internal Server Error",
+									"originalRequest": {
+										"method": "GET",
+										"header": [],
+										"url": {
+											"raw": "{{baseUrl}}/api/exam-types/",
+											"host": [
+												"{{baseUrl}}"
+											],
+											"path": [
+												"api",
+												"exam-types",
+												""
+											]
+										}
+									},
+									"status": "Internal Server Error",
+									"code": 500,
+									"_postman_previewlanguage": "text",
+									"header": [],
+									"cookie": [],
+									"body": ""
+								}
+							]
+						}
+					]
+				},
+				{
+					"name": "exams",
+					"item": [
+						{
+							"name": "{id}",
+							"item": [
+								{
+									"name": "upload-excel",
+									"item": [
+										{
+											"name": "/api/exams/:id/upload-excel",
+											"request": {
+												"method": "POST",
+												"header": [],
+												"body": {
+													"mode": "formdata",
+													"formdata": [
+														{
+															"key": "file",
+															"type": "file",
+															"src": "/Users/bektassahin/Documents/EnOkul/BackEnd/belgeler/9 HAZİRAN 6 ŞAMPİYONLAR.xls"
+														}
+													]
+												},
+												"url": {
+													"raw": "{{baseUrl}}/api/exams/:id/upload-excel",
+													"host": [
+														"{{baseUrl}}"
+													],
+													"path": [
+														"api",
+														"exams",
+														":id",
+														"upload-excel"
+													],
+													"variable": [
+														{
+															"key": "id",
+															"value": "68bde5ef84ecb58041adbad3",
+															"description": "(Required) "
+														}
+													]
+												}
+											},
+											"response": [
+												{
+													"name": "Created",
+													"originalRequest": {
+														"method": "POST",
+														"header": [],
+														"url": {
+															"raw": "{{baseUrl}}/api/exams/:id/upload-excel",
+															"host": [
+																"{{baseUrl}}"
+															],
+															"path": [
+																"api",
+																"exams",
+																":id",
+																"upload-excel"
+															],
+															"variable": [
+																{
+																	"key": "id"
+																}
+															]
+														}
+													},
+													"status": "Created",
+													"code": 201,
+													"_postman_previewlanguage": "text",
+													"header": [],
+													"cookie": [],
+													"body": ""
+												},
+												{
+													"name": "Bad Request",
+													"originalRequest": {
+														"method": "POST",
+														"header": [],
+														"url": {
+															"raw": "{{baseUrl}}/api/exams/:id/upload-excel",
+															"host": [
+																"{{baseUrl}}"
+															],
+															"path": [
+																"api",
+																"exams",
+																":id",
+																"upload-excel"
+															],
+															"variable": [
+																{
+																	"key": "id"
+																}
+															]
+														}
+													},
+													"status": "Bad Request",
+													"code": 400,
+													"_postman_previewlanguage": "text",
+													"header": [],
+													"cookie": [],
+													"body": ""
+												},
+												{
+													"name": "Internal Server Error",
+													"originalRequest": {
+														"method": "POST",
+														"header": [],
+														"url": {
+															"raw": "{{baseUrl}}/api/exams/:id/upload-excel",
+															"host": [
+																"{{baseUrl}}"
+															],
+															"path": [
+																"api",
+																"exams",
+																":id",
+																"upload-excel"
+															],
+															"variable": [
+																{
+																	"key": "id"
+																}
+															]
+														}
+													},
+													"status": "Internal Server Error",
+													"code": 500,
+													"_postman_previewlanguage": "text",
+													"header": [],
+													"cookie": [],
+													"body": ""
+												}
+											]
+										}
+									]
+								},
+								{
+									"name": "upload-txt",
+									"item": [
+										{
+											"name": "Optik form sonuçlarını TXT dosyasından yükler",
+											"request": {
+												"method": "POST",
+												"header": [
+													{
+														"key": "Content-Type",
+														"value": "multipart/form-data"
+													},
+													{
+														"key": "Accept",
+														"value": "application/json"
+													}
+												],
+												"body": {
+													"mode": "formdata",
+													"formdata": [
+														{
+															"key": "file",
+															"description": "(Required) TXT dosyası (optik form sonuçları)",
+															"type": "file",
+															"src": "/Users/bektassahin/Documents/EnOkul/BackEnd/belgeler/9 HAZİRAN 6 ŞAMPİYONLAR cevaplar.txt"
+														},
+														{
+															"key": "optikFormId",
+															"value": "68be047d171e395a088e6a74",
+															"description": "(Required) Kullanılacak optik form ID'si",
+															"type": "text"
+														}
+													]
+												},
+												"url": {
+													"raw": "{{baseUrl}}/api/exams/:id/upload-txt",
+													"host": [
+														"{{baseUrl}}"
+													],
+													"path": [
+														"api",
+														"exams",
+														":id",
+														"upload-txt"
+													],
+													"variable": [
+														{
+															"key": "id",
+															"value": "68bde5ef84ecb58041adbad3",
+															"description": "(Required) Sınav ID'si"
+														}
+													]
+												},
+												"description": "Belirtilen optik forma göre TXT dosyasındaki öğrenci cevaplarını parse eder"
+											},
+											"response": [
+												{
+													"name": "TXT dosyası başarıyla işlendi",
+													"originalRequest": {
+														"method": "POST",
+														"header": [
+															{
+																"key": "Content-Type",
+																"value": "multipart/form-data"
+															},
+															{
+																"key": "Accept",
+																"value": "application/json"
+															}
+														],
+														"body": {
+															"mode": "formdata",
+															"formdata": [
+																{
+																	"key": "file",
+																	"description": "(Required) TXT dosyası (optik form sonuçları)",
+																	"type": "file",
+																	"src": []
+																},
+																{
+																	"key": "optikFormId",
+																	"value": "3dbf5098-8578-c356-a2c0-eda8d4044784",
+																	"description": "(Required) Kullanılacak optik form ID'si",
+																	"type": "text"
+																}
+															]
+														},
+														"url": {
+															"raw": "{{baseUrl}}/api/exams/:id/upload-txt",
+															"host": [
+																"{{baseUrl}}"
+															],
+															"path": [
+																"api",
+																"exams",
+																":id",
+																"upload-txt"
+															],
+															"variable": [
+																{
+																	"key": "id"
+																}
+															]
+														}
+													},
+													"status": "Created",
+													"code": 201,
+													"_postman_previewlanguage": "json",
+													"header": [
+														{
+															"key": "Content-Type",
+															"value": "application/json"
+														}
+													],
+													"cookie": [],
+													"body": "{\n  \"message\": \"TXT dosyası başarıyla işlendi\",\n  \"stats\": {\n    \"totalLines\": 150,\n    \"processedStudents\": 148,\n    \"errors\": 0,\n    \"warnings\": 2\n  },\n  \"details\": {\n    \"warnings\": [\n      \"Satır 5: Öğrenci adı boş\",\n      \"Satır 12: TC kimlik numarası eksik\"\n    ]\n  }\n}"
+												},
+												{
+													"name": "Geçersiz dosya veya optik form",
+													"originalRequest": {
+														"method": "POST",
+														"header": [
+															{
+																"key": "Content-Type",
+																"value": "multipart/form-data"
+															},
+															{
+																"key": "Accept",
+																"value": "application/json"
+															}
+														],
+														"body": {
+															"mode": "formdata",
+															"formdata": [
+																{
+																	"key": "file",
+																	"description": "(Required) TXT dosyası (optik form sonuçları)",
+																	"type": "file",
+																	"src": []
+																},
+																{
+																	"key": "optikFormId",
+																	"value": "3dbf5098-8578-c356-a2c0-eda8d4044784",
+																	"description": "(Required) Kullanılacak optik form ID'si",
+																	"type": "text"
+																}
+															]
+														},
+														"url": {
+															"raw": "{{baseUrl}}/api/exams/:id/upload-txt",
+															"host": [
+																"{{baseUrl}}"
+															],
+															"path": [
+																"api",
+																"exams",
+																":id",
+																"upload-txt"
+															],
+															"variable": [
+																{
+																	"key": "id"
+																}
+															]
+														}
+													},
+													"status": "Bad Request",
+													"code": 400,
+													"_postman_previewlanguage": "json",
+													"header": [
+														{
+															"key": "Content-Type",
+															"value": "application/json"
+														}
+													],
+													"cookie": [],
+													"body": "{\n  \"error\": \"TXT dosyası gerekli (field name: file)\"\n}"
+												},
+												{
+													"name": "Sınav veya optik form bulunamadı",
+													"originalRequest": {
+														"method": "POST",
+														"header": [
+															{
+																"key": "Content-Type",
+																"value": "multipart/form-data"
+															},
+															{
+																"key": "Accept",
+																"value": "application/json"
+															}
+														],
+														"body": {
+															"mode": "formdata",
+															"formdata": [
+																{
+																	"key": "file",
+																	"description": "(Required) TXT dosyası (optik form sonuçları)",
+																	"type": "file",
+																	"src": []
+																},
+																{
+																	"key": "optikFormId",
+																	"value": "3dbf5098-8578-c356-a2c0-eda8d4044784",
+																	"description": "(Required) Kullanılacak optik form ID'si",
+																	"type": "text"
+																}
+															]
+														},
+														"url": {
+															"raw": "{{baseUrl}}/api/exams/:id/upload-txt",
+															"host": [
+																"{{baseUrl}}"
+															],
+															"path": [
+																"api",
+																"exams",
+																":id",
+																"upload-txt"
+															],
+															"variable": [
+																{
+																	"key": "id"
+																}
+															]
+														}
+													},
+													"status": "Not Found",
+													"code": 404,
+													"_postman_previewlanguage": "json",
+													"header": [
+														{
+															"key": "Content-Type",
+															"value": "application/json"
+														}
+													],
+													"cookie": [],
+													"body": "{\n  \"error\": \"Exam not found\"\n}"
+												},
+												{
+													"name": "Sunucu hatası",
+													"originalRequest": {
+														"method": "POST",
+														"header": [
+															{
+																"key": "Content-Type",
+																"value": "multipart/form-data"
+															},
+															{
+																"key": "Accept",
+																"value": "application/json"
+															}
+														],
+														"body": {
+															"mode": "formdata",
+															"formdata": [
+																{
+																	"key": "file",
+																	"description": "(Required) TXT dosyası (optik form sonuçları)",
+																	"type": "file",
+																	"src": []
+																},
+																{
+																	"key": "optikFormId",
+																	"value": "3dbf5098-8578-c356-a2c0-eda8d4044784",
+																	"description": "(Required) Kullanılacak optik form ID'si",
+																	"type": "text"
+																}
+															]
+														},
+														"url": {
+															"raw": "{{baseUrl}}/api/exams/:id/upload-txt",
+															"host": [
+																"{{baseUrl}}"
+															],
+															"path": [
+																"api",
+																"exams",
+																":id",
+																"upload-txt"
+															],
+															"variable": [
+																{
+																	"key": "id"
+																}
+															]
+														}
+													},
+													"status": "Internal Server Error",
+													"code": 500,
+													"_postman_previewlanguage": "json",
+													"header": [
+														{
+															"key": "Content-Type",
+															"value": "application/json"
+														}
+													],
+													"cookie": [],
+													"body": "{\n  \"error\": \"Internal server error\"\n}"
+												}
+											]
+										}
+									]
+								},
+								{
+									"name": "/api/exams/:id",
+									"request": {
+										"method": "GET",
+										"header": [],
+										"url": {
+											"raw": "{{baseUrl}}/api/exams/:id",
+											"host": [
+												"{{baseUrl}}"
+											],
+											"path": [
+												"api",
+												"exams",
+												":id"
+											],
+											"variable": [
+												{
+													"key": "id",
+													"value": "<string>",
+													"description": "(Required) "
+												}
+											]
+										}
+									},
+									"response": [
+										{
+											"name": "OK",
+											"originalRequest": {
+												"method": "GET",
+												"header": [],
+												"url": {
+													"raw": "{{baseUrl}}/api/exams/:id",
+													"host": [
+														"{{baseUrl}}"
+													],
+													"path": [
+														"api",
+														"exams",
+														":id"
+													],
+													"variable": [
+														{
+															"key": "id"
+														}
+													]
+												}
+											},
+											"status": "OK",
+											"code": 200,
+											"_postman_previewlanguage": "text",
+											"header": [],
+											"cookie": [],
+											"body": ""
+										},
+										{
+											"name": "Not Found",
+											"originalRequest": {
+												"method": "GET",
+												"header": [],
+												"url": {
+													"raw": "{{baseUrl}}/api/exams/:id",
+													"host": [
+														"{{baseUrl}}"
+													],
+													"path": [
+														"api",
+														"exams",
+														":id"
+													],
+													"variable": [
+														{
+															"key": "id"
+														}
+													]
+												}
+											},
+											"status": "Not Found",
+											"code": 404,
+											"_postman_previewlanguage": "text",
+											"header": [],
+											"cookie": [],
+											"body": ""
+										},
+										{
+											"name": "Internal Server Error",
+											"originalRequest": {
+												"method": "GET",
+												"header": [],
+												"url": {
+													"raw": "{{baseUrl}}/api/exams/:id",
+													"host": [
+														"{{baseUrl}}"
+													],
+													"path": [
+														"api",
+														"exams",
+														":id"
+													],
+													"variable": [
+														{
+															"key": "id"
+														}
+													]
+												}
+											},
+											"status": "Internal Server Error",
+											"code": 500,
+											"_postman_previewlanguage": "text",
+											"header": [],
+											"cookie": [],
+											"body": ""
+										}
+									]
+								},
+								{
+									"name": "/api/exams/:id",
+									"request": {
+										"method": "PUT",
+										"header": [],
+										"url": {
+											"raw": "{{baseUrl}}/api/exams/:id",
+											"host": [
+												"{{baseUrl}}"
+											],
+											"path": [
+												"api",
+												"exams",
+												":id"
+											],
+											"variable": [
+												{
+													"key": "id",
+													"value": "<string>",
+													"description": "(Required) "
+												}
+											]
+										}
+									},
+									"response": [
+										{
+											"name": "OK",
+											"originalRequest": {
+												"method": "PUT",
+												"header": [],
+												"url": {
+													"raw": "{{baseUrl}}/api/exams/:id",
+													"host": [
+														"{{baseUrl}}"
+													],
+													"path": [
+														"api",
+														"exams",
+														":id"
+													],
+													"variable": [
+														{
+															"key": "id"
+														}
+													]
+												}
+											},
+											"status": "OK",
+											"code": 200,
+											"_postman_previewlanguage": "text",
+											"header": [],
+											"cookie": [],
+											"body": ""
+										},
+										{
+											"name": "Bad Request",
+											"originalRequest": {
+												"method": "PUT",
+												"header": [],
+												"url": {
+													"raw": "{{baseUrl}}/api/exams/:id",
+													"host": [
+														"{{baseUrl}}"
+													],
+													"path": [
+														"api",
+														"exams",
+														":id"
+													],
+													"variable": [
+														{
+															"key": "id"
+														}
+													]
+												}
+											},
+											"status": "Bad Request",
+											"code": 400,
+											"_postman_previewlanguage": "text",
+											"header": [],
+											"cookie": [],
+											"body": ""
+										},
+										{
+											"name": "Not Found",
+											"originalRequest": {
+												"method": "PUT",
+												"header": [],
+												"url": {
+													"raw": "{{baseUrl}}/api/exams/:id",
+													"host": [
+														"{{baseUrl}}"
+													],
+													"path": [
+														"api",
+														"exams",
+														":id"
+													],
+													"variable": [
+														{
+															"key": "id"
+														}
+													]
+												}
+											},
+											"status": "Not Found",
+											"code": 404,
+											"_postman_previewlanguage": "text",
+											"header": [],
+											"cookie": [],
+											"body": ""
+										}
+									]
+								},
+								{
+									"name": "/api/exams/:id",
+									"request": {
+										"method": "DELETE",
+										"header": [],
+										"url": {
+											"raw": "{{baseUrl}}/api/exams/:id",
+											"host": [
+												"{{baseUrl}}"
+											],
+											"path": [
+												"api",
+												"exams",
+												":id"
+											],
+											"variable": [
+												{
+													"key": "id",
+													"value": "<string>",
+													"description": "(Required) "
+												}
+											]
+										}
+									},
+									"response": [
+										{
+											"name": "OK",
+											"originalRequest": {
+												"method": "DELETE",
+												"header": [],
+												"url": {
+													"raw": "{{baseUrl}}/api/exams/:id",
+													"host": [
+														"{{baseUrl}}"
+													],
+													"path": [
+														"api",
+														"exams",
+														":id"
+													],
+													"variable": [
+														{
+															"key": "id"
+														}
+													]
+												}
+											},
+											"status": "OK",
+											"code": 200,
+											"_postman_previewlanguage": "text",
+											"header": [],
+											"cookie": [],
+											"body": ""
+										},
+										{
+											"name": "Not Found",
+											"originalRequest": {
+												"method": "DELETE",
+												"header": [],
+												"url": {
+													"raw": "{{baseUrl}}/api/exams/:id",
+													"host": [
+														"{{baseUrl}}"
+													],
+													"path": [
+														"api",
+														"exams",
+														":id"
+													],
+													"variable": [
+														{
+															"key": "id"
+														}
+													]
+												}
+											},
+											"status": "Not Found",
+											"code": 404,
+											"_postman_previewlanguage": "text",
+											"header": [],
+											"cookie": [],
+											"body": ""
+										},
+										{
+											"name": "Internal Server Error",
+											"originalRequest": {
+												"method": "DELETE",
+												"header": [],
+												"url": {
+													"raw": "{{baseUrl}}/api/exams/:id",
+													"host": [
+														"{{baseUrl}}"
+													],
+													"path": [
+														"api",
+														"exams",
+														":id"
+													],
+													"variable": [
+														{
+															"key": "id"
+														}
+													]
+												}
+											},
+											"status": "Internal Server Error",
+											"code": 500,
+											"_postman_previewlanguage": "text",
+											"header": [],
+											"cookie": [],
+											"body": ""
+										}
+									]
+								}
+							]
+						},
+						{
+							"name": "/api/exams/",
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"name\" : \"8.SINIF SÜREÇ İZLEME-1\",\n  \"date\" : \"07-12-2024\",\n  \"classLevels\" : \"8\",\n  \"examTypeId\" : \"68bde53d84ecb58041adbacb\",\n  \"code\" : \"9765\",\n  \"wrongCount\" : 3,\n  \"duration\" : 150,\n  \"subjects\" : [\n    {\n        \"name\" : \"TÜRKÇE\",\n        \"questionCount\" : 15\n    },\n    {\n        \"name\" : \"SOSYAL\",\n        \"questionCount\" : 10\n    },\n    {\n        \"name\" : \"DİN\",\n        \"questionCount\" : 10\n    },\n    {\n        \"name\" : \"İNGİLİZCE\",\n        \"questionCount\" : 10\n    },\n    {\n        \"name\" : \"MATEMATİK\",\n        \"questionCount\" : 15\n    },\n    {\n        \"name\" : \"FEN\",\n        \"questionCount\" : 15\n    }\n  ]\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{baseUrl}}/api/exams/",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"api",
+										"exams",
+										""
+									]
+								}
+							},
+							"response": [
+								{
+									"name": "Created",
+									"originalRequest": {
+										"method": "POST",
+										"header": [],
+										"url": {
+											"raw": "{{baseUrl}}/api/exams/",
+											"host": [
+												"{{baseUrl}}"
+											],
+											"path": [
+												"api",
+												"exams",
+												""
+											]
+										}
+									},
+									"status": "Created",
+									"code": 201,
+									"_postman_previewlanguage": "text",
+									"header": [],
+									"cookie": [],
+									"body": ""
+								},
+								{
+									"name": "Bad Request",
+									"originalRequest": {
+										"method": "POST",
+										"header": [],
+										"url": {
+											"raw": "{{baseUrl}}/api/exams/",
+											"host": [
+												"{{baseUrl}}"
+											],
+											"path": [
+												"api",
+												"exams",
+												""
+											]
+										}
+									},
+									"status": "Bad Request",
+									"code": 400,
+									"_postman_previewlanguage": "text",
+									"header": [],
+									"cookie": [],
+									"body": ""
+								}
+							]
+						},
+						{
+							"name": "/api/exams/",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{baseUrl}}/api/exams/",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"api",
+										"exams",
+										""
+									]
+								}
+							},
+							"response": [
+								{
+									"name": "OK",
+									"originalRequest": {
+										"method": "GET",
+										"header": [],
+										"url": {
+											"raw": "{{baseUrl}}/api/exams/",
+											"host": [
+												"{{baseUrl}}"
+											],
+											"path": [
+												"api",
+												"exams",
+												""
+											]
+										}
+									},
+									"status": "OK",
+									"code": 200,
+									"_postman_previewlanguage": "text",
+									"header": [],
+									"cookie": [],
+									"body": ""
+								},
+								{
+									"name": "Internal Server Error",
+									"originalRequest": {
+										"method": "GET",
+										"header": [],
+										"url": {
+											"raw": "{{baseUrl}}/api/exams/",
+											"host": [
+												"{{baseUrl}}"
+											],
+											"path": [
+												"api",
+												"exams",
+												""
+											]
+										}
+									},
+									"status": "Internal Server Error",
+									"code": 500,
+									"_postman_previewlanguage": "text",
+									"header": [],
+									"cookie": [],
+									"body": ""
+								}
+							]
+						}
+					]
+				},
+				{
+					"name": "optik-forms",
+					"item": [
+						{
+							"name": "by-exam-type",
+							"item": [
+								{
+									"name": "{examTypeId}",
+									"item": [
+										{
+											"name": "/api/optik-forms/by-exam-type/:examTypeId",
+											"request": {
+												"method": "GET",
+												"header": [],
+												"url": {
+													"raw": "{{baseUrl}}/api/optik-forms/by-exam-type/:examTypeId",
+													"host": [
+														"{{baseUrl}}"
+													],
+													"path": [
+														"api",
+														"optik-forms",
+														"by-exam-type",
+														":examTypeId"
+													],
+													"variable": [
+														{
+															"key": "examTypeId",
+															"value": "<string>",
+															"description": "(Required) "
+														}
+													]
+												}
+											},
+											"response": [
+												{
+													"name": "OK",
+													"originalRequest": {
+														"method": "GET",
+														"header": [],
+														"url": {
+															"raw": "{{baseUrl}}/api/optik-forms/by-exam-type/:examTypeId",
+															"host": [
+																"{{baseUrl}}"
+															],
+															"path": [
+																"api",
+																"optik-forms",
+																"by-exam-type",
+																":examTypeId"
+															],
+															"variable": [
+																{
+																	"key": "examTypeId"
+																}
+															]
+														}
+													},
+													"status": "OK",
+													"code": 200,
+													"_postman_previewlanguage": "text",
+													"header": [],
+													"cookie": [],
+													"body": ""
+												},
+												{
+													"name": "Not Found",
+													"originalRequest": {
+														"method": "GET",
+														"header": [],
+														"url": {
+															"raw": "{{baseUrl}}/api/optik-forms/by-exam-type/:examTypeId",
+															"host": [
+																"{{baseUrl}}"
+															],
+															"path": [
+																"api",
+																"optik-forms",
+																"by-exam-type",
+																":examTypeId"
+															],
+															"variable": [
+																{
+																	"key": "examTypeId"
+																}
+															]
+														}
+													},
+													"status": "Not Found",
+													"code": 404,
+													"_postman_previewlanguage": "text",
+													"header": [],
+													"cookie": [],
+													"body": ""
+												},
+												{
+													"name": "Internal Server Error",
+													"originalRequest": {
+														"method": "GET",
+														"header": [],
+														"url": {
+															"raw": "{{baseUrl}}/api/optik-forms/by-exam-type/:examTypeId",
+															"host": [
+																"{{baseUrl}}"
+															],
+															"path": [
+																"api",
+																"optik-forms",
+																"by-exam-type",
+																":examTypeId"
+															],
+															"variable": [
+																{
+																	"key": "examTypeId"
+																}
+															]
+														}
+													},
+													"status": "Internal Server Error",
+													"code": 500,
+													"_postman_previewlanguage": "text",
+													"header": [],
+													"cookie": [],
+													"body": ""
+												}
+											]
+										}
+									]
+								}
+							]
+						},
+						{
+							"name": "{id}",
+							"item": [
+								{
+									"name": "/api/optik-forms/:id",
+									"request": {
+										"method": "GET",
+										"header": [],
+										"url": {
+											"raw": "{{baseUrl}}/api/optik-forms/:id",
+											"host": [
+												"{{baseUrl}}"
+											],
+											"path": [
+												"api",
+												"optik-forms",
+												":id"
+											],
+											"variable": [
+												{
+													"key": "id",
+													"value": "<string>",
+													"description": "(Required) "
+												}
+											]
+										}
+									},
+									"response": [
+										{
+											"name": "OK",
+											"originalRequest": {
+												"method": "GET",
+												"header": [],
+												"url": {
+													"raw": "{{baseUrl}}/api/optik-forms/:id",
+													"host": [
+														"{{baseUrl}}"
+													],
+													"path": [
+														"api",
+														"optik-forms",
+														":id"
+													],
+													"variable": [
+														{
+															"key": "id"
+														}
+													]
+												}
+											},
+											"status": "OK",
+											"code": 200,
+											"_postman_previewlanguage": "text",
+											"header": [],
+											"cookie": [],
+											"body": ""
+										},
+										{
+											"name": "Not Found",
+											"originalRequest": {
+												"method": "GET",
+												"header": [],
+												"url": {
+													"raw": "{{baseUrl}}/api/optik-forms/:id",
+													"host": [
+														"{{baseUrl}}"
+													],
+													"path": [
+														"api",
+														"optik-forms",
+														":id"
+													],
+													"variable": [
+														{
+															"key": "id"
+														}
+													]
+												}
+											},
+											"status": "Not Found",
+											"code": 404,
+											"_postman_previewlanguage": "text",
+											"header": [],
+											"cookie": [],
+											"body": ""
+										},
+										{
+											"name": "Internal Server Error",
+											"originalRequest": {
+												"method": "GET",
+												"header": [],
+												"url": {
+													"raw": "{{baseUrl}}/api/optik-forms/:id",
+													"host": [
+														"{{baseUrl}}"
+													],
+													"path": [
+														"api",
+														"optik-forms",
+														":id"
+													],
+													"variable": [
+														{
+															"key": "id"
+														}
+													]
+												}
+											},
+											"status": "Internal Server Error",
+											"code": 500,
+											"_postman_previewlanguage": "text",
+											"header": [],
+											"cookie": [],
+											"body": ""
+										}
+									]
+								},
+								{
+									"name": "/api/optik-forms/:id",
+									"request": {
+										"method": "PUT",
+										"header": [],
+										"url": {
+											"raw": "{{baseUrl}}/api/optik-forms/:id",
+											"host": [
+												"{{baseUrl}}"
+											],
+											"path": [
+												"api",
+												"optik-forms",
+												":id"
+											],
+											"variable": [
+												{
+													"key": "id",
+													"value": "<string>",
+													"description": "(Required) "
+												}
+											]
+										}
+									},
+									"response": [
+										{
+											"name": "OK",
+											"originalRequest": {
+												"method": "PUT",
+												"header": [],
+												"url": {
+													"raw": "{{baseUrl}}/api/optik-forms/:id",
+													"host": [
+														"{{baseUrl}}"
+													],
+													"path": [
+														"api",
+														"optik-forms",
+														":id"
+													],
+													"variable": [
+														{
+															"key": "id"
+														}
+													]
+												}
+											},
+											"status": "OK",
+											"code": 200,
+											"_postman_previewlanguage": "text",
+											"header": [],
+											"cookie": [],
+											"body": ""
+										},
+										{
+											"name": "Bad Request",
+											"originalRequest": {
+												"method": "PUT",
+												"header": [],
+												"url": {
+													"raw": "{{baseUrl}}/api/optik-forms/:id",
+													"host": [
+														"{{baseUrl}}"
+													],
+													"path": [
+														"api",
+														"optik-forms",
+														":id"
+													],
+													"variable": [
+														{
+															"key": "id"
+														}
+													]
+												}
+											},
+											"status": "Bad Request",
+											"code": 400,
+											"_postman_previewlanguage": "text",
+											"header": [],
+											"cookie": [],
+											"body": ""
+										},
+										{
+											"name": "Not Found",
+											"originalRequest": {
+												"method": "PUT",
+												"header": [],
+												"url": {
+													"raw": "{{baseUrl}}/api/optik-forms/:id",
+													"host": [
+														"{{baseUrl}}"
+													],
+													"path": [
+														"api",
+														"optik-forms",
+														":id"
+													],
+													"variable": [
+														{
+															"key": "id"
+														}
+													]
+												}
+											},
+											"status": "Not Found",
+											"code": 404,
+											"_postman_previewlanguage": "text",
+											"header": [],
+											"cookie": [],
+											"body": ""
+										}
+									]
+								},
+								{
+									"name": "/api/optik-forms/:id",
+									"request": {
+										"method": "DELETE",
+										"header": [],
+										"url": {
+											"raw": "{{baseUrl}}/api/optik-forms/:id",
+											"host": [
+												"{{baseUrl}}"
+											],
+											"path": [
+												"api",
+												"optik-forms",
+												":id"
+											],
+											"variable": [
+												{
+													"key": "id",
+													"value": "<string>",
+													"description": "(Required) "
+												}
+											]
+										}
+									},
+									"response": [
+										{
+											"name": "OK",
+											"originalRequest": {
+												"method": "DELETE",
+												"header": [],
+												"url": {
+													"raw": "{{baseUrl}}/api/optik-forms/:id",
+													"host": [
+														"{{baseUrl}}"
+													],
+													"path": [
+														"api",
+														"optik-forms",
+														":id"
+													],
+													"variable": [
+														{
+															"key": "id"
+														}
+													]
+												}
+											},
+											"status": "OK",
+											"code": 200,
+											"_postman_previewlanguage": "text",
+											"header": [],
+											"cookie": [],
+											"body": ""
+										},
+										{
+											"name": "Not Found",
+											"originalRequest": {
+												"method": "DELETE",
+												"header": [],
+												"url": {
+													"raw": "{{baseUrl}}/api/optik-forms/:id",
+													"host": [
+														"{{baseUrl}}"
+													],
+													"path": [
+														"api",
+														"optik-forms",
+														":id"
+													],
+													"variable": [
+														{
+															"key": "id"
+														}
+													]
+												}
+											},
+											"status": "Not Found",
+											"code": 404,
+											"_postman_previewlanguage": "text",
+											"header": [],
+											"cookie": [],
+											"body": ""
+										},
+										{
+											"name": "Internal Server Error",
+											"originalRequest": {
+												"method": "DELETE",
+												"header": [],
+												"url": {
+													"raw": "{{baseUrl}}/api/optik-forms/:id",
+													"host": [
+														"{{baseUrl}}"
+													],
+													"path": [
+														"api",
+														"optik-forms",
+														":id"
+													],
+													"variable": [
+														{
+															"key": "id"
+														}
+													]
+												}
+											},
+											"status": "Internal Server Error",
+											"code": 500,
+											"_postman_previewlanguage": "text",
+											"header": [],
+											"cookie": [],
+											"body": ""
+										}
+									]
+								}
+							]
+						},
+						{
+							"name": "/api/optik-forms/",
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"formAdi\": \"test formu\",\n  \"formKodu\": \"test kod\",\n  \"examTypeId\": \"68bde53d84ecb58041adbacb\",\n  \"fields\": {\n    \"ogrenciAdi\": { \"start\": 19, \"end\": 39 },\n    \"ogrenciNo\": { \"start\": 1, \"end\": 7 },\n    //\"tcKimlikNo\": { \"start\": 1, \"end\": 2 },\n    //\"cinsiyet\": { \"start\": 1, \"end\": 2 },\n    \"kt\": { \"start\": 0, \"end\": 1 },\n    //\"bolgeKodu\": { \"start\": 1, \"end\": 2 },\n    //\"oturum\": { \"start\": 1, \"end\": 2 },\n    //\"ilKodu\": { \"start\": 1, \"end\": 2 },\n    //\"ilceKodu\": { \"start\": 1, \"end\": 2 },\n    //\"okulKodu\": { \"start\": 1, \"end\": 2 },\n    \"sinif\": { \"start\": 17, \"end\": 18 },\n    \"sube\": { \"start\": 18, \"end\": 19 }//,\n    //\"brans\": { \"start\": 1, \"end\": 2 },\n    //\"yas\": { \"start\": 1, \"end\": 2 },\n    //\"telefon\": { \"start\": 1, \"end\": 2 },\n    //\"kt1\": { \"start\": 1, \"end\": 2 }\n  },\n  \"subjects\": [\n    { \"name\": \"TÜRKÇE\",   \"start\": 50, \"soruSayisi\": 15 },\n    { \"name\": \"SOSYAL\",   \"start\": 75, \"soruSayisi\": 10 },\n    { \"name\": \"DİN\",      \"start\": 100, \"soruSayisi\": 10 },\n    { \"name\": \"İNGİLİZCE\",\"start\": 125, \"soruSayisi\": 10 },\n    { \"name\": \"MATEMATİK\",\"start\": 150, \"soruSayisi\": 15 },\n    { \"name\": \"FEN\",      \"start\": 175, \"soruSayisi\": 15 }\n  ]\n}\n",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{baseUrl}}/api/optik-forms/",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"api",
+										"optik-forms",
+										""
+									]
+								}
+							},
+							"response": [
+								{
+									"name": "Created",
+									"originalRequest": {
+										"method": "POST",
+										"header": [],
+										"url": {
+											"raw": "{{baseUrl}}/api/optik-forms/",
+											"host": [
+												"{{baseUrl}}"
+											],
+											"path": [
+												"api",
+												"optik-forms",
+												""
+											]
+										}
+									},
+									"status": "Created",
+									"code": 201,
+									"_postman_previewlanguage": "text",
+									"header": [],
+									"cookie": [],
+									"body": ""
+								},
+								{
+									"name": "Bad Request",
+									"originalRequest": {
+										"method": "POST",
+										"header": [],
+										"url": {
+											"raw": "{{baseUrl}}/api/optik-forms/",
+											"host": [
+												"{{baseUrl}}"
+											],
+											"path": [
+												"api",
+												"optik-forms",
+												""
+											]
+										}
+									},
+									"status": "Bad Request",
+									"code": 400,
+									"_postman_previewlanguage": "text",
+									"header": [],
+									"cookie": [],
+									"body": ""
+								}
+							]
+						},
+						{
+							"name": "/api/optik-forms/",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{baseUrl}}/api/optik-forms/",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"api",
+										"optik-forms",
+										""
+									]
+								}
+							},
+							"response": [
+								{
+									"name": "OK",
+									"originalRequest": {
+										"method": "GET",
+										"header": [],
+										"url": {
+											"raw": "{{baseUrl}}/api/optik-forms/",
+											"host": [
+												"{{baseUrl}}"
+											],
+											"path": [
+												"api",
+												"optik-forms",
+												""
+											]
+										}
+									},
+									"status": "OK",
+									"code": 200,
+									"_postman_previewlanguage": "text",
+									"header": [],
+									"cookie": [],
+									"body": ""
+								},
+								{
+									"name": "Internal Server Error",
+									"originalRequest": {
+										"method": "GET",
+										"header": [],
+										"url": {
+											"raw": "{{baseUrl}}/api/optik-forms/",
+											"host": [
+												"{{baseUrl}}"
+											],
+											"path": [
+												"api",
+												"optik-forms",
+												""
+											]
+										}
+									},
+									"status": "Internal Server Error",
+									"code": 500,
+									"_postman_previewlanguage": "text",
+									"header": [],
+									"cookie": [],
+									"body": ""
+								}
+							]
+						}
+					]
+				},
+				{
+					"name": "student-results",
+					"item": [
+						{
+							"name": "Get Student Results",
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"url": {
+									"raw": "{{baseUrl}}/api/exams/{{examId}}/student-results?optikFormId={{optikFormId}}&limit={{limit}}&skip={{skip}}",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"api",
+										"exams",
+										"{{examId}}",
+										"student-results"
+									],
+									"query": [
+										{
+											"key": "optikFormId",
+											"value": "{{optikFormId}}",
+											"description": "Optik form ID'si (filtreleme için - opsiyonel)"
+										},
+										{
+											"key": "limit",
+											"value": "{{limit}}",
+											"description": "Gösterilecek sonuç sayısı (varsayılan: 50)"
+										},
+										{
+											"key": "skip",
+											"value": "{{skip}}",
+											"description": "Atlanacak sonuç sayısı (varsayılan: 0)"
+										}
+									]
+								},
+								"description": "Belirtilen sınavın TXT dosyasından parse edilmiş öğrenci sonuçlarını getirir. Optik form ID'si ile filtrelenebilir ve pagination destekler."
+							},
+							"response": [
+								{
+									"name": "Success Response",
+									"originalRequest": {
+										"method": "GET",
+										"header": [
+											{
+												"key": "Content-Type",
+												"value": "application/json",
+												"type": "text"
+											}
+										],
+										"url": {
+											"raw": "http://localhost:3000/api/exams/123e4567-e89b-12d3-a456-426614174000/student-results?optikFormId=550e8400-e29b-41d4-a716-446655440000&limit=10&skip=0",
+											"protocol": "http",
+											"host": [
+												"localhost"
+											],
+											"port": "3000",
+											"path": [
+												"api",
+												"exams",
+												"123e4567-e89b-12d3-a456-426614174000",
+												"student-results"
+											],
+											"query": [
+												{
+													"key": "optikFormId",
+													"value": "550e8400-e29b-41d4-a716-446655440000"
+												},
+												{
+													"key": "limit",
+													"value": "10"
+												},
+												{
+													"key": "skip",
+													"value": "0"
+												}
+											]
+										}
+									},
+									"status": "OK",
+									"code": 200,
+									"_postman_previewlanguage": "Text",
+									"header": [
+										{
+											"key": "Content-Type",
+											"value": "application/json"
+										}
+									],
+									"cookie": [],
+									"body": "{\n  \"results\": [\n    {\n      \"id\": \"result-uuid-1\",\n      \"examId\": \"123e4567-e89b-12d3-a456-426614174000\",\n      \"optikFormId\": \"550e8400-e29b-41d4-a716-446655440000\",\n      \"studentInfo\": {\n        \"tcKimlikNo\": \"12345678901\",\n        \"ogrenciAdi\": \"AHMET YİLMAZ\",\n        \"sinif\": \"6A\",\n        \"telefon\": \"05551234567\",\n        \"ogrenciNo\": \"1234\"\n      },\n      \"subjectAnswers\": [\n        {\n          \"subjectName\": \"Türkçe\",\n          \"answers\": \"ABCDABCD\",\n          \"startPosition\": 50,\n          \"endPosition\": 58,\n          \"questionCount\": 8\n        },\n        {\n          \"subjectName\": \"Matematik\",\n          \"answers\": \"BDACBDAC\",\n          \"startPosition\": 58,\n          \"endPosition\": 66,\n          \"questionCount\": 8\n        }\n      ],\n      \"parseStatus\": \"success\",\n      \"lineNumber\": 1,\n      \"createdAt\": \"2025-09-08T10:30:00.000Z\"\n    }\n  ],\n  \"totalCount\": 150,\n  \"stats\": {\n    \"successCount\": 148,\n    \"warningCount\": 2,\n    \"errorCount\": 0\n  },\n  \"pagination\": {\n    \"limit\": 10,\n    \"skip\": 0,\n    \"hasMore\": true\n  }\n}"
+								},
+								{
+									"name": "Exam Not Found",
+									"originalRequest": {
+										"method": "GET",
+										"header": [
+											{
+												"key": "Content-Type",
+												"value": "application/json",
+												"type": "text"
+											}
+										],
+										"url": {
+											"raw": "http://localhost:3000/api/exams/nonexistent-exam-id/student-results",
+											"protocol": "http",
+											"host": [
+												"localhost"
+											],
+											"port": "3000",
+											"path": [
+												"api",
+												"exams",
+												"nonexistent-exam-id",
+												"student-results"
+											]
+										}
+									},
+									"status": "Not Found",
+									"code": 404,
+									"_postman_previewlanguage": "Text",
+									"header": [
+										{
+											"key": "Content-Type",
+											"value": "application/json"
+										}
+									],
+									"cookie": [],
+									"body": "{\n  \"error\": \"Exam not found\"\n}"
+								}
+							]
+						},
+						{
+							"name": "Get Student Results (All)",
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"url": {
+									"raw": "{{baseUrl}}/api/exams/:examId/student-results",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"api",
+										"exams",
+										":examId",
+										"student-results"
+									],
+									"variable": [
+										{
+											"key": "examId",
+											"value": "68bde5ef84ecb58041adbad3"
+										}
+									]
+								},
+								"description": "Tüm öğrenci sonuçlarını getirir (filtreleme olmadan)"
+							},
+							"response": []
+						},
+						{
+							"name": "Get Student Results (Filtered by OptikForm)",
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"url": {
+									"raw": "{{baseUrl}}/api/exams/{{examId}}/student-results?optikFormId={{optikFormId}}",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"api",
+										"exams",
+										"{{examId}}",
+										"student-results"
+									],
+									"query": [
+										{
+											"key": "optikFormId",
+											"value": "{{optikFormId}}",
+											"description": "Belirli optik form sonuçlarını filtrele"
+										}
+									]
+								},
+								"description": "Belirli optik form ID'sine göre filtrelenmiş öğrenci sonuçlarını getirir"
+							},
+							"response": []
+						},
+						{
+							"name": "Get Student Results (Paginated)",
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"url": {
+									"raw": "{{baseUrl}}/api/exams/{{examId}}/student-results?limit=20&skip=40",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"api",
+										"exams",
+										"{{examId}}",
+										"student-results"
+									],
+									"query": [
+										{
+											"key": "limit",
+											"value": "20",
+											"description": "Sayfa başına gösterilecek sonuç sayısı"
+										},
+										{
+											"key": "skip",
+											"value": "40",
+											"description": "Atlanacak sonuç sayısı (3. sayfa için)"
+										}
+									]
+								},
+								"description": "Sayfalama ile öğrenci sonuçlarını getirir"
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "exam-analysis",
+					"item": [
+						{
+							"name": "Analyze Student Results",
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"optikFormId\": \"68be047d171e395a088e6a74\",\n  \"includeDetails\": true\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{baseUrl}}/api/exams/:examId/analyze-results",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"api",
+										"exams",
+										":examId",
+										"analyze-results"
+									],
+									"variable": [
+										{
+											"key": "examId",
+											"value": "68bde5ef84ecb58041adbad3"
+										}
+									]
+								},
+								"description": "TXT'den gelen öğrenci cevaplarını Excel'deki doğru cevaplarla karşılaştırarak detaylı analiz yapar"
+							},
+							"response": [
+								{
+									"name": "Success Response (Detailed)",
+									"originalRequest": {
+										"method": "POST",
+										"header": [
+											{
+												"key": "Content-Type",
+												"value": "application/json",
+												"type": "text"
+											}
+										],
+										"body": {
+											"mode": "raw",
+											"raw": "{\n  \"optikFormId\": \"550e8400-e29b-41d4-a716-446655440000\",\n  \"includeDetails\": true\n}",
+											"options": {
+												"raw": {
+													"language": "json"
+												}
+											}
+										},
+										"url": {
+											"raw": "http://localhost:3000/api/exams/123e4567-e89b-12d3-a456-426614174000/analyze-results",
+											"protocol": "http",
+											"host": [
+												"localhost"
+											],
+											"port": "3000",
+											"path": [
+												"api",
+												"exams",
+												"123e4567-e89b-12d3-a456-426614174000",
+												"analyze-results"
+											]
+										}
+									},
+									"status": "OK",
+									"code": 200,
+									"_postman_previewlanguage": "Text",
+									"header": [
+										{
+											"key": "Content-Type",
+											"value": "application/json"
+										}
+									],
+									"cookie": [],
+									"body": "{\n  \"message\": \"Analiz başarıyla tamamlandı\",\n  \"examInfo\": {\n    \"examId\": \"123e4567-e89b-12d3-a456-426614174000\",\n    \"examName\": \"6. Sınıf Türkçe Sınavı\",\n    \"optikFormId\": \"550e8400-e29b-41d4-a716-446655440000\",\n    \"optikFormName\": \"6. Sınıf Standart Form\"\n  },\n  \"analysisStats\": {\n    \"totalStudents\": 150,\n    \"totalQuestions\": 40,\n    \"averageScore\": 72.5,\n    \"highestScore\": 95.2,\n    \"lowestScore\": 35.8,\n    \"passCount\": 125,\n    \"failCount\": 25\n  },\n  \"subjectAnalysis\": [\n    {\n      \"subjectName\": \"Türkçe\",\n      \"totalQuestions\": 20,\n      \"averageScore\": 68.5,\n      \"highestScore\": 100,\n      \"lowestScore\": 25,\n      \"totalCorrect\": 2055,\n      \"totalWrong\": 890,\n      \"totalEmpty\": 55,\n      \"studentCount\": 150\n    },\n    {\n      \"subjectName\": \"Matematik\",\n      \"totalQuestions\": 20,\n      \"averageScore\": 76.8,\n      \"highestScore\": 100,\n      \"lowestScore\": 40,\n      \"totalCorrect\": 2304,\n      \"totalWrong\": 634,\n      \"totalEmpty\": 62,\n      \"studentCount\": 150\n    }\n  ],\n  \"studentResults\": [\n    {\n      \"studentInfo\": {\n        \"tcKimlikNo\": \"12345678901\",\n        \"ogrenciAdi\": \"AHMET YİLMAZ\",\n        \"sinif\": \"6A\",\n        \"telefon\": \"05551234567\"\n      },\n      \"totalScore\": 85.5,\n      \"totalCorrect\": 34,\n      \"totalWrong\": 5,\n      \"totalEmpty\": 1,\n      \"subjectScores\": [\n        {\n          \"subjectName\": \"Türkçe\",\n          \"correct\": 17,\n          \"wrong\": 2,\n          \"empty\": 1,\n          \"score\": 85.0\n        },\n        {\n          \"subjectName\": \"Matematik\",\n          \"correct\": 17,\n          \"wrong\": 3,\n          \"empty\": 0,\n          \"score\": 85.0\n        }\n      ],\n      \"detailedAnswers\": [\n        {\n          \"questionNumber\": 1,\n          \"studentAnswer\": \"A\",\n          \"correctAnswer\": \"A\",\n          \"isCorrect\": true,\n          \"isEmpty\": false\n        }\n      ]\n    }\n  ]\n}"
+								},
+								{
+									"name": "Success Response (Summary Only)",
+									"originalRequest": {
+										"method": "POST",
+										"header": [
+											{
+												"key": "Content-Type",
+												"value": "application/json",
+												"type": "text"
+											}
+										],
+										"body": {
+											"mode": "raw",
+											"raw": "{\n  \"optikFormId\": \"550e8400-e29b-41d4-a716-446655440000\",\n  \"includeDetails\": false\n}",
+											"options": {
+												"raw": {
+													"language": "json"
+												}
+											}
+										},
+										"url": {
+											"raw": "http://localhost:3000/api/exams/123e4567-e89b-12d3-a456-426614174000/analyze-results",
+											"protocol": "http",
+											"host": [
+												"localhost"
+											],
+											"port": "3000",
+											"path": [
+												"api",
+												"exams",
+												"123e4567-e89b-12d3-a456-426614174000",
+												"analyze-results"
+											]
+										}
+									},
+									"status": "OK",
+									"code": 200,
+									"_postman_previewlanguage": "Text",
+									"header": [
+										{
+											"key": "Content-Type",
+											"value": "application/json"
+										}
+									],
+									"cookie": [],
+									"body": "{\n  \"message\": \"Analiz başarıyla tamamlandı\",\n  \"examInfo\": {\n    \"examId\": \"123e4567-e89b-12d3-a456-426614174000\",\n    \"examName\": \"6. Sınıf Türkçe Sınavı\",\n    \"optikFormId\": \"550e8400-e29b-41d4-a716-446655440000\",\n    \"optikFormName\": \"6. Sınıf Standart Form\"\n  },\n  \"analysisStats\": {\n    \"totalStudents\": 150,\n    \"totalQuestions\": 40,\n    \"averageScore\": 72.5,\n    \"highestScore\": 95.2,\n    \"lowestScore\": 35.8,\n    \"passCount\": 125,\n    \"failCount\": 25\n  },\n  \"subjectAnalysis\": [\n    {\n      \"subjectName\": \"Türkçe\",\n      \"totalQuestions\": 20,\n      \"averageScore\": 68.5,\n      \"highestScore\": 100,\n      \"lowestScore\": 25,\n      \"totalCorrect\": 2055,\n      \"totalWrong\": 890,\n      \"totalEmpty\": 55,\n      \"studentCount\": 150\n    }\n  ],\n  \"studentResults\": [\n    {\n      \"studentInfo\": {\n        \"tcKimlikNo\": \"12345678901\",\n        \"ogrenciAdi\": \"AHMET YİLMAZ\",\n        \"sinif\": \"6A\",\n        \"telefon\": \"05551234567\"\n      },\n      \"totalScore\": 85.5,\n      \"totalCorrect\": 34,\n      \"totalWrong\": 5,\n      \"totalEmpty\": 1,\n      \"subjectScores\": [\n        {\n          \"subjectName\": \"Türkçe\",\n          \"correct\": 17,\n          \"wrong\": 2,\n          \"empty\": 1,\n          \"score\": 85.0\n        }\n      ]\n    }\n  ]\n}"
+								},
+								{
+									"name": "Exam Not Found",
+									"originalRequest": {
+										"method": "POST",
+										"header": [
+											{
+												"key": "Content-Type",
+												"value": "application/json",
+												"type": "text"
+											}
+										],
+										"body": {
+											"mode": "raw",
+											"raw": "{\n  \"optikFormId\": \"550e8400-e29b-41d4-a716-446655440000\"\n}",
+											"options": {
+												"raw": {
+													"language": "json"
+												}
+											}
+										},
+										"url": {
+											"raw": "http://localhost:3000/api/exams/nonexistent-exam-id/analyze-results",
+											"protocol": "http",
+											"host": [
+												"localhost"
+											],
+											"port": "3000",
+											"path": [
+												"api",
+												"exams",
+												"nonexistent-exam-id",
+												"analyze-results"
+											]
+										}
+									},
+									"status": "Not Found",
+									"code": 404,
+									"_postman_previewlanguage": "Text",
+									"header": [
+										{
+											"key": "Content-Type",
+											"value": "application/json"
+										}
+									],
+									"cookie": [],
+									"body": "{\n  \"error\": \"Exam not found\"\n}"
+								},
+								{
+									"name": "Missing Excel Data",
+									"originalRequest": {
+										"method": "POST",
+										"header": [
+											{
+												"key": "Content-Type",
+												"value": "application/json",
+												"type": "text"
+											}
+										],
+										"body": {
+											"mode": "raw",
+											"raw": "{\n  \"optikFormId\": \"550e8400-e29b-41d4-a716-446655440000\"\n}",
+											"options": {
+												"raw": {
+													"language": "json"
+												}
+											}
+										},
+										"url": {
+											"raw": "http://localhost:3000/api/exams/123e4567-e89b-12d3-a456-426614174000/analyze-results",
+											"protocol": "http",
+											"host": [
+												"localhost"
+											],
+											"port": "3000",
+											"path": [
+												"api",
+												"exams",
+												"123e4567-e89b-12d3-a456-426614174000",
+												"analyze-results"
+											]
+										}
+									},
+									"status": "Not Found",
+									"code": 404,
+									"_postman_previewlanguage": "Text",
+									"header": [
+										{
+											"key": "Content-Type",
+											"value": "application/json"
+										}
+									],
+									"cookie": [],
+									"body": "{\n  \"error\": \"Exam content not found. Please upload Excel file first.\"\n}"
+								}
+							]
+						},
+						{
+							"name": "Analyze Results (Summary Only)",
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"optikFormId\": \"68be047d171e395a088e6a74\",\n  \"includeDetails\": false\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{baseUrl}}/api/exams/:examId/analyze-results",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"api",
+										"exams",
+										":examId",
+										"analyze-results"
+									],
+									"variable": [
+										{
+											"key": "examId",
+											"value": "68bde5ef84ecb58041adbad3"
+										}
+									]
+								},
+								"description": "Sadece özet istatistikleri döner, detaylı cevap analizi dahil edilmez"
+							},
+							"response": []
+						}
+					]
+				}
+			]
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"packages": {},
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"packages": {},
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "baseUrl",
+			"value": "http://172.28.107.97:3001/"
+		}
+	]
+}
