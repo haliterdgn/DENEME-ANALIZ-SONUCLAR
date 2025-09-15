@@ -100,9 +100,42 @@ class ApiClient {
       }
     }
 
-    // GET istekleri için boş array döndür
+    // GET istekleri için mock veri döndür
     if (url.includes('/api/exam-types/')) {
-      return []
+      // Tek bir sınav tipi detayı isteniyorsa
+      if (url.match(/\/api\/exam-types\/[a-zA-Z0-9]+$/)) {
+        return {
+          success: true,
+          data: {
+            _id: 'mock-exam-type-1',
+            typeName: 'LGS Deneme Sınavı',
+            sinifSeviyeleri: [5, 6, 7, 8],
+            toplamSure: 120,
+            dersler: [
+              { dersAdi: 'Türkçe', soruSayisi: 20 },
+              { dersAdi: 'Matematik', soruSayisi: 20 },
+              { dersAdi: 'Fen Bilimleri', soruSayisi: 20 },
+              { dersAdi: 'İnkılap Tarihi', soruSayisi: 10 },
+              { dersAdi: 'Din Kültürü', soruSayisi: 10 },
+              { dersAdi: 'İngilizce', soruSayisi: 10 }
+            ]
+          }
+        }
+      }
+      // Tüm sınav tipleri listesi
+      return {
+        success: true,
+        data: [
+          {
+            _id: 'mock-exam-type-1',
+            typeName: 'LGS Deneme Sınavı'
+          },
+          {
+            _id: 'mock-exam-type-2', 
+            typeName: 'TYT Deneme Sınavı'
+          }
+        ]
+      }
     }
     if (url.includes('/api/optik-forms/')) {
       return []

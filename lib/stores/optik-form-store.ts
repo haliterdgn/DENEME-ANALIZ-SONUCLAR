@@ -17,11 +17,13 @@ export interface OptikForm {
   id: string
   formAdi: string
   formKodu: string
+  bookletType?: string // A, B, C, D kitapçık türü
   examId?: string // optional for backward compatibility
   examTypeId?: string // new field for exam type
   fields: {
     formAdi: FormField
     formKodu: FormField
+    kitapcikTuru: FormField // A, B, C, D kitapçık türü pozisyonu
     ogrenciAdi: FormField
     ogrenciNo: FormField
     tcKimlikNo: FormField
@@ -37,7 +39,6 @@ export interface OptikForm {
     brans: FormField
     yas: FormField
     telefon: FormField
-    kt1: FormField
   }
   subjects: SubjectArea[]
   createdAt: string
@@ -66,7 +67,8 @@ export const useOptikFormStore = create<OptikFormState>()(
           fields: {
             formAdi: { start: 1, end: 20 },
             formKodu: { start: 21, end: 30 },
-            ogrenciAdi: { start: 31, end: 60 },
+            kitapcikTuru: { start: 31, end: 31 }, // Tek karakter A/B/C/D
+            ogrenciAdi: { start: 32, end: 60 },
             ogrenciNo: { start: 61, end: 70 },
             tcKimlikNo: { start: 71, end: 81 },
             cinsiyet: { start: 82, end: 83 },
@@ -81,7 +83,6 @@ export const useOptikFormStore = create<OptikFormState>()(
             brans: { start: 109, end: 111 },
             yas: { start: 112, end: 114 },
             telefon: { start: 115, end: 125 },
-            kt1: { start: 126, end: 127 },
           },
           subjects: [
             { name: "Cebir", start: 160, end: 179, soruSayisi: 20 },

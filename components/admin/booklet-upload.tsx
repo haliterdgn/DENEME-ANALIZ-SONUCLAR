@@ -514,7 +514,7 @@ export default function BookletUpload({ examId, onClose }: BookletUploadProps) {
                           ) : (
                             backendOptikForms.map((form) => (
                               <SelectItem key={form._id || form.id} value={form._id || form.id}>
-                                {form.formAdi} ({form.formKodu})
+                                {form.formAdi} ({form.formKodu}) - {(form as any).kitapcikTuru ? `Kitapçık ${(form as any).kitapcikTuru}` : 'Kitapçık Türü Belirtilmedi'}
                               </SelectItem>
                             ))
                           )}

@@ -41,7 +41,11 @@ const defaultSubjects: SubjectArea[] = [
 const defaultStudentFields: StudentField[] = [
   { name: "ogrenciAdi", label: "Öğrenci Adı", start: 16, end: 20 },
   { name: "ogrenciNo", label: "Öğrenci No", start: 10, end: 13 },
+  { name: "kitapcikTuru", label: "Kitapçık Türü", start: 9, end: 9 },
   { name: "tcKimlikNo", label: "TC Kimlik No", start: 0, end: 0 },
+  { name: "cinsiyet", label: "Cinsiyet", start: 0, end: 0 },
+  { name: "kt", label: "KT", start: 0, end: 0 },
+  { name: "bolgeKodu", label: "Bölge Kodu", start: 0, end: 0 },
   { name: "oturum", label: "Oturum", start: 0, end: 0 },
   { name: "ilKodu", label: "İl Kodu", start: 0, end: 0 },
   { name: "ilceKodu", label: "İlçe Kodu", start: 0, end: 0 },
@@ -51,7 +55,6 @@ const defaultStudentFields: StudentField[] = [
   { name: "brans", label: "Branş", start: 0, end: 0 },
   { name: "yas", label: "Yaş", start: 0, end: 0 },
   { name: "telefon", label: "Telefon", start: 0, end: 0 },
-  { name: "kt1", label: "KT1", start: 0, end: 0 },
 ]
 
 export default function OptikFormTanimla() {
@@ -71,8 +74,9 @@ export default function OptikFormTanimla() {
   useEffect(() => {
     const fetchExamTypes = async () => {
       try {
-        const types = await apiClient.getExamTypes()
-        setExamTypes(types || [])
+        const response = await apiClient.getExamTypes()
+        console.log('getExamTypes response:', response)
+        setExamTypes(response?.data || response || [])
       } catch (error) {
         console.warn('Offline modda çalışıyor')
         setExamTypes([])
@@ -80,6 +84,42 @@ export default function OptikFormTanimla() {
     }
     fetchExamTypes()
   }, [])
+
+  // Sınav tipi değiştiğinde derslerini otomatik yükle
+  useEffect(() => {
+    const loadSubjectsFromExamType = async () => {
+      console.log('examTypeId değişti:', examTypeId)
+      if (examTypeId && examTypeId !== "none") {
+        try {
+          console.log('Sınav tipi detayları getiriliyor:', examTypeId)
+          const response = await apiClient.getExamType(examTypeId)
+          console.log('Sınav tipi response:', response)
+          
+          if (response.success && response.data?.dersler) {
+            console.log('Bulunan dersler:', response.data.dersler)
+            const examTypeSubjects = response.data.dersler.map((ders: any, index: number) => ({
+              name: ders.dersAdi,
+              start: 0, // Başlangıç pozisyonu manuel girilecek
+              end: 0,
+              soruSayisi: ders.soruSayisi || 0
+            }))
+            console.log('Oluşturulan subjects:', examTypeSubjects)
+            setSubjects(examTypeSubjects)
+          } else {
+            console.log('Ders bulunamadı veya response başarısız')
+          }
+        } catch (error) {
+          console.error('Sınav tipi dersleri yüklenirken hata:', error)
+          // Hata durumunda varsayılan dersleri koru
+        }
+      } else {
+        console.log('Sınav tipi seçilmemiş, varsayılan dersler yükleniyor')
+        // Sınav tipi seçilmemişse varsayılan dersleri yükle
+        setSubjects(defaultSubjects)
+      }
+    }
+    loadSubjectsFromExamType()
+  }, [examTypeId])
 
   // Ders alanını güncelle
   const updateSubject = (index: number, field: keyof SubjectArea, value: string | number) => {
@@ -108,7 +148,7 @@ export default function OptikFormTanimla() {
   // Form kaydet
   const handleSave = async () => {
     if (!formAdi.trim() || !formKodu.trim()) {
-      alert('Form adı ve kodu zorunludur!')
+      alert('Form adı ve form kodu zorunludur!')
       return
     }
 
@@ -216,6 +256,8 @@ export default function OptikFormTanimla() {
                 className="mt-1"
               />
             </div>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-1 gap-4 mt-4">
             <div>
               <Label htmlFor="examType">Sınav Tipi (Opsiyonel)</Label>
               <Select value={examTypeId} onValueChange={setExamTypeId}>

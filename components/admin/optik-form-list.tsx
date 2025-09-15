@@ -7,11 +7,12 @@ import { Badge } from "@/components/ui/badge"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog"
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
-import { Trash2, FileText, Eye, Plus, Calendar, Hash, Users } from "lucide-react"
+import { Trash2, FileText, Eye, Edit, Plus, Calendar, Hash, Users } from "lucide-react"
 import { useOptikFormStore } from "@/lib/stores/optik-form-store"
 import { useExamStore } from "@/lib/stores/exam-store"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Separator } from "@/components/ui/separator"
+import OptikFormEditModal from "./optik-form-edit-modal"
 
 export default function OptikFormList() {
   const { optikForms, deleteOptikForm } = useOptikFormStore()
@@ -22,6 +23,8 @@ export default function OptikFormList() {
   const [success, setSuccess] = useState(false)
   const [selectedForm, setSelectedForm] = useState<any>(null)
   const [isDetailModalOpen, setIsDetailModalOpen] = useState(false)
+  const [editingForm, setEditingForm] = useState<any>(null)
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false)
 
   useEffect(() => {
     fetchOptikForms()
@@ -92,6 +95,11 @@ export default function OptikFormList() {
     setIsDetailModalOpen(true)
   }
 
+  const handleEdit = (form: any) => {
+    setEditingForm(form)
+    setIsEditModalOpen(true)
+  }
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
@@ -134,6 +142,7 @@ export default function OptikFormList() {
                   <TableRow>
                     <TableHead>Form Adı</TableHead>
                     <TableHead>Form Kodu</TableHead>
+                    <TableHead className="text-center">Kitapçık Türü</TableHead>
                     <TableHead className="text-center">
                       <div className="flex items-center justify-center gap-1">
                         <Users className="h-4 w-4" />
@@ -168,6 +177,17 @@ export default function OptikFormList() {
                         <Badge variant="outline">{form.formKodu}</Badge>
                       </TableCell>
                       <TableCell className="text-center">
+                        <Badge variant={(form as any).kitapcikTuru ? "default" : "secondary"} className={
+                          (form as any).kitapcikTuru === 'A' ? "bg-red-100 text-red-800" :
+                          (form as any).kitapcikTuru === 'B' ? "bg-blue-100 text-blue-800" :
+                          (form as any).kitapcikTuru === 'C' ? "bg-green-100 text-green-800" :
+                          (form as any).kitapcikTuru === 'D' ? "bg-yellow-100 text-yellow-800" :
+                          "bg-gray-100 text-gray-800"
+                        }>
+                          {(form as any).kitapcikTuru || "-"}
+                        </Badge>
+                      </TableCell>
+                      <TableCell className="text-center">
                         <Badge variant="secondary">
                           {totalSubjects(form.subjects)}
                         </Badge>
@@ -188,6 +208,14 @@ export default function OptikFormList() {
                             onClick={() => handleViewDetails(form)}
                           >
                             <Eye className="h-4 w-4" />
+                          </Button>
+                          <Button 
+                            variant="outline" 
+                            size="sm"
+                            className="text-blue-600 hover:text-blue-700 hover:bg-blue-50"
+                            onClick={() => handleEdit(form)}
+                          >
+                            <Edit className="h-4 w-4" />
                           </Button>
                           <AlertDialog>
                             <AlertDialogTrigger asChild>
@@ -253,6 +281,7 @@ export default function OptikFormList() {
                     <TableRow>
                       <TableHead>Form Adı</TableHead>
                       <TableHead>Form Kodu</TableHead>
+                      <TableHead className="text-center">Kitapçık Türü</TableHead>
                       <TableHead className="text-center">
                         <div className="flex items-center justify-center gap-1">
                           <Users className="h-4 w-4" />
@@ -289,6 +318,17 @@ export default function OptikFormList() {
                           </Badge>
                         </TableCell>
                         <TableCell className="text-center">
+                          <Badge variant={(form as any).kitapcikTuru ? "default" : "secondary"} className={
+                            (form as any).kitapcikTuru === 'A' ? "bg-red-100 text-red-800" :
+                            (form as any).kitapcikTuru === 'B' ? "bg-blue-100 text-blue-800" :
+                            (form as any).kitapcikTuru === 'C' ? "bg-green-100 text-green-800" :
+                            (form as any).kitapcikTuru === 'D' ? "bg-yellow-100 text-yellow-800" :
+                            "bg-gray-100 text-gray-800"
+                          }>
+                            {(form as any).kitapcikTuru || "-"}
+                          </Badge>
+                        </TableCell>
+                        <TableCell className="text-center">
                           <Badge variant="secondary">
                             {totalSubjects(form.subjects)}
                           </Badge>
@@ -309,6 +349,14 @@ export default function OptikFormList() {
                               onClick={() => handleViewDetails(form)}
                             >
                               <Eye className="h-4 w-4" />
+                            </Button>
+                            <Button 
+                              variant="outline" 
+                              size="sm"
+                              className="text-blue-600 hover:text-blue-700 hover:bg-blue-50"
+                              onClick={() => handleEdit(form)}
+                            >
+                              <Edit className="h-4 w-4" />
                             </Button>
                             <AlertDialog>
                               <AlertDialogTrigger asChild>
@@ -398,6 +446,20 @@ export default function OptikFormList() {
                   <p className="font-semibold">{selectedForm.formKodu}</p>
                 </div>
                 <div>
+                  <h4 className="font-medium text-sm text-gray-600">Kitapçık Türü</h4>
+                  <div className="font-semibold">
+                    <Badge variant="default" className={
+                      (selectedForm as any).kitapcikTuru === 'A' ? "bg-red-100 text-red-800" :
+                      (selectedForm as any).kitapcikTuru === 'B' ? "bg-blue-100 text-blue-800" :
+                      (selectedForm as any).kitapcikTuru === 'C' ? "bg-green-100 text-green-800" :
+                      (selectedForm as any).kitapcikTuru === 'D' ? "bg-yellow-100 text-yellow-800" :
+                      "bg-gray-100 text-gray-800"
+                    }>
+                      {(selectedForm as any).kitapcikTuru || "Belirtilmedi"}
+                    </Badge>
+                  </div>
+                </div>
+                <div>
                   <h4 className="font-medium text-sm text-gray-600">Toplam Ders</h4>
                   <p className="font-semibold">{totalSubjects(selectedForm.subjects)}</p>
                 </div>
@@ -464,6 +526,32 @@ export default function OptikFormList() {
                 )}
               </div>
             </div>
+          )}
+        </DialogContent>
+      </Dialog>
+
+      {/* Düzenleme Modal */}
+      <Dialog open={isEditModalOpen} onOpenChange={setIsEditModalOpen}>
+        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Edit className="h-5 w-5 text-blue-600" />
+              Optik Form Düzenle
+            </DialogTitle>
+            <DialogDescription>
+              {editingForm?.formAdi} - {editingForm?.formKodu} formunu düzenleyin
+            </DialogDescription>
+          </DialogHeader>
+          
+          {editingForm && (
+            <OptikFormEditModal 
+              form={editingForm} 
+              onClose={() => {
+                setIsEditModalOpen(false)
+                setEditingForm(null)
+                fetchOptikForms() // Listeyi yenile
+              }} 
+            />
           )}
         </DialogContent>
       </Dialog>

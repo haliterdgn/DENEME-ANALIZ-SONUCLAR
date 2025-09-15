@@ -16,7 +16,6 @@ import { apiClient } from "@/lib/api-client"
 interface Subject {
   name: string
   questionCount: number
-  duration?: number // Ders için ayrılan süre (dakika)
 }
 
 interface ExamType {
@@ -27,8 +26,7 @@ interface ExamType {
   subjects: Subject[]
   totalDuration: number // Toplam sınav süresi (dakika)
   totalQuestions: number
-  passingScore?: number // Geçme notu
-  gradeLevels: string[] // Hangi sınıf seviyelerine uygun
+  gradeLevels: string[] // Hangi sınıf seviyelerine uygun (5-8. sınıflar)
   isActive: boolean
   createdAt?: string
   updatedAt?: string
@@ -46,7 +44,6 @@ export default function ExamTypeManagement() {
     subjects: [],
     totalDuration: 0,
     totalQuestions: 0,
-    passingScore: 50,
     gradeLevels: [],
     isActive: true
   })
@@ -78,7 +75,7 @@ export default function ExamTypeManagement() {
         { name: "Biyoloji", questionCount: 13, duration: 30 }
       ],
       totalDuration: 150,
-      gradeLevels: ["12. Sınıf"],
+      gradeLevels: ["8. Sınıf"],
       passingScore: 50
     },
     TYT: {
@@ -91,7 +88,7 @@ export default function ExamTypeManagement() {
         { name: "Fen Bilimleri", questionCount: 20, duration: 25 }
       ],
       totalDuration: 150,
-      gradeLevels: ["11. Sınıf", "12. Sınıf"],
+      gradeLevels: ["7. Sınıf", "8. Sınıf"],
       passingScore: 45
     }
   }
@@ -101,17 +98,15 @@ export default function ExamTypeManagement() {
     fetchOptikForms()
   }, [])
 
-  // Dersler değiştiğinde toplam soru ve süreyi otomatik hesapla
+  // Dersler değiştiğinde toplam soru sayısını otomatik hesapla
   useEffect(() => {
     const totalQuestions = formData.subjects.reduce((sum, subject) => sum + (subject.questionCount || 0), 0)
-    const totalDuration = formData.subjects.reduce((sum, subject) => sum + (subject.duration || 0), 0)
     
-    // Sadece toplam değerler farklıysa güncelle (sonsuz döngüyü önle)
-    if (formData.totalQuestions !== totalQuestions || formData.totalDuration !== totalDuration) {
+    // Sadece toplam soru sayısı farklıysa güncelle (sonsuz döngüyü önle)
+    if (formData.totalQuestions !== totalQuestions) {
       setFormData(prev => ({
         ...prev,
-        totalQuestions,
-        totalDuration
+        totalQuestions
       }))
     }
   }, [formData.subjects])
@@ -203,7 +198,6 @@ export default function ExamTypeManagement() {
       subjects: [],
       totalDuration: 0,
       totalQuestions: 0,
-      passingScore: 50,
       gradeLevels: [],
       isActive: true
     })
@@ -232,17 +226,15 @@ export default function ExamTypeManagement() {
   }
 
   const addSubject = () => {
-    const newSubjects = [...formData.subjects, { name: "", questionCount: 0, duration: 0 }]
+    const newSubjects = [...formData.subjects, { name: "", questionCount: 0 }]
     
-    // Toplam soru sayısı ve süreyi otomatik hesapla
+    // Toplam soru sayısını otomatik hesapla
     const totalQuestions = newSubjects.reduce((sum, subject) => sum + (subject.questionCount || 0), 0)
-    const totalDuration = newSubjects.reduce((sum, subject) => sum + (subject.duration || 0), 0)
     
     setFormData({
       ...formData,
       subjects: newSubjects,
-      totalQuestions,
-      totalDuration
+      totalQuestions
     })
   }
 
@@ -251,30 +243,26 @@ export default function ExamTypeManagement() {
       i === index ? { ...subject, [field]: value } : subject
     )
     
-    // Toplam soru sayısı ve süreyi otomatik hesapla
+    // Toplam soru sayısını otomatik hesapla
     const totalQuestions = updatedSubjects.reduce((sum, subject) => sum + (subject.questionCount || 0), 0)
-    const totalDuration = updatedSubjects.reduce((sum, subject) => sum + (subject.duration || 0), 0)
     
     setFormData({ 
       ...formData, 
       subjects: updatedSubjects,
-      totalQuestions,
-      totalDuration
+      totalQuestions
     })
   }
 
   const removeSubject = (index: number) => {
     const updatedSubjects = formData.subjects.filter((_, i) => i !== index)
     
-    // Toplam soru sayısı ve süreyi otomatik hesapla
+    // Toplam soru sayısını otomatik hesapla
     const totalQuestions = updatedSubjects.reduce((sum, subject) => sum + (subject.questionCount || 0), 0)
-    const totalDuration = updatedSubjects.reduce((sum, subject) => sum + (subject.duration || 0), 0)
     
     setFormData({ 
       ...formData, 
       subjects: updatedSubjects,
-      totalQuestions,
-      totalDuration
+      totalQuestions
     })
   }
 
@@ -353,16 +341,16 @@ export default function ExamTypeManagement() {
                       />
                     </div>
                     <div>
-                      <Label htmlFor="totalDuration">Toplam Süre (dakika)</Label>
+                      <Label htmlFor="totalDuration">Toplam Süre (dakika) *</Label>
                       <Input
                         id="totalDuration"
                         type="number"
                         value={formData.totalDuration}
-                        readOnly
-                        className="bg-gray-50"
-                        placeholder="Derslerden otomatik hesaplanır"
+                        onChange={(e) => setFormData({ ...formData, totalDuration: parseInt(e.target.value) || 0 })}
+                        placeholder="Örn: 150"
+                        min="0"
                       />
-                      <p className="text-xs text-gray-500 mt-1">Derslerin sürelerinden otomatik hesaplanır</p>
+                      <p className="text-xs text-gray-500 mt-1">Sınav için ayrılacak toplam süre</p>
                     </div>
                   </div>
 
@@ -398,7 +386,7 @@ export default function ExamTypeManagement() {
                   <div>
                     <Label htmlFor="gradeLevels">Sınıf Seviyeleri</Label>
                     <div className="flex flex-wrap gap-2 mt-2">
-                      {["5. Sınıf", "6. Sınıf", "7. Sınıf", "8. Sınıf", "9. Sınıf", "10. Sınıf", "11. Sınıf", "12. Sınıf"].map((grade) => (
+                      {["5. Sınıf", "6. Sınıf", "7. Sınıf", "8. Sınıf"].map((grade) => (
                         <Button
                           key={grade}
                           type="button"
@@ -450,15 +438,6 @@ export default function ExamTypeManagement() {
                               />
                             </div>
                             <div>
-                              <Label>Süre (dk)</Label>
-                              <Input
-                                type="number"
-                                value={subject.duration || 0}
-                                onChange={(e) => updateSubject(index, 'duration', parseInt(e.target.value) || 0)}
-                                placeholder="40"
-                              />
-                            </div>
-                            <div>
                               <Button
                                 variant="destructive"
                                 size="sm"
@@ -476,12 +455,9 @@ export default function ExamTypeManagement() {
                   {formData.subjects.length > 0 && (
                     <Card className="bg-blue-50">
                       <CardContent className="p-4">
-                        <div className="grid grid-cols-3 gap-4 text-sm">
+                        <div className="grid grid-cols-2 gap-4 text-sm">
                           <div>
                             <strong>Toplam Soru:</strong> {formData.subjects.reduce((sum, s) => sum + s.questionCount, 0)}
-                          </div>
-                          <div>
-                            <strong>Ders Süresi:</strong> {formData.subjects.reduce((sum, s) => sum + (s.duration || 0), 0)} dk
                           </div>
                           <div>
                             <strong>Ders Sayısı:</strong> {formData.subjects.length}
@@ -493,20 +469,8 @@ export default function ExamTypeManagement() {
                 </TabsContent>
 
                 <TabsContent value="settings" className="space-y-4">
-                  <div className="grid grid-cols-2 gap-4">
-                    <div>
-                      <Label htmlFor="passingScore">Geçme Notu (%)</Label>
-                      <Input
-                        id="passingScore"
-                        type="number"
-                        value={formData.passingScore}
-                        onChange={(e) => setFormData({ ...formData, passingScore: parseInt(e.target.value) || 0 })}
-                        placeholder="50"
-                        min="0"
-                        max="100"
-                      />
-                    </div>
-                    <div className="flex items-center space-x-2 pt-6">
+                  <div className="grid grid-cols-1 gap-4">
+                    <div className="flex items-center space-x-2">
                       <input
                         type="checkbox"
                         id="isActive"
@@ -596,10 +560,6 @@ export default function ExamTypeManagement() {
                   <div>
                     <div className="text-sm text-gray-500">Ders Sayısı</div>
                     <div className="font-medium">{examType.subjects?.length || 0}</div>
-                  </div>
-                  <div>
-                    <div className="text-sm text-gray-500">Geçme Notu</div>
-                    <div className="font-medium">{examType.passingScore || 50}%</div>
                   </div>
                 </div>
 

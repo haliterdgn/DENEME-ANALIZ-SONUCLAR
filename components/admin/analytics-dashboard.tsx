@@ -365,7 +365,7 @@ export default function AnalyticsDashboard() {
                           <tr className="bg-gray-50">
                             <th className="border border-gray-200 p-2 text-left font-semibold">Sıra</th>
                             <th className="border border-gray-200 p-2 text-left font-semibold">Ad Soyad</th>
-                            <th className="border border-gray-200 p-2 text-left font-semibold">TC Kimlik</th>
+                            <th className="border border-gray-200 p-2 text-left font-semibold">Kitapçık Türü</th>
                             <th className="border border-gray-200 p-2 text-left font-semibold">Doğru</th>
                             <th className="border border-gray-200 p-2 text-left font-semibold">Yanlış</th>
                             <th className="border border-gray-200 p-2 text-left font-semibold">Boş</th>
@@ -384,7 +384,7 @@ export default function AnalyticsDashboard() {
                                   {index < 3 && (index === 0 ? '🥇' : index === 1 ? '🥈' : '🥉')}
                                 </td>
                                 <td className="border border-gray-200 p-2 font-medium">{result.studentName || 'N/A'}</td>
-                                <td className="border border-gray-200 p-2 text-xs">{result.studentId || 'N/A'}</td>
+                                <td className="border border-gray-200 p-2 text-xs">{result.kitapcikTuru || 'N/A'}</td>
                                 <td className="border border-gray-200 p-2 text-green-600">{result.totalCorrect || 0}</td>
                                 <td className="border border-gray-200 p-2 text-red-600">{result.totalWrong || 0}</td>
                                 <td className="border border-gray-200 p-2 text-gray-600">{result.totalEmpty || 0}</td>

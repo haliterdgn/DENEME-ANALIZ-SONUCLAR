@@ -25,7 +25,6 @@ interface ExamFormData {
   classLevels: string
   examTypeId: string
   code: string
-  wrongCount: number
   duration: number
   subjects: any[]
 }
@@ -102,7 +101,6 @@ export default function CreateExamForm() {
   } = useForm<ExamFormData>({
     defaultValues: {
       subjects: [],
-      wrongCount: 3,
       duration: 150,
     },
   })
@@ -149,7 +147,6 @@ export default function CreateExamForm() {
         classLevels: data.classLevels, // Backend'de classLevels bekleniyor
         examTypeId: data.examTypeId,
         code: data.code,
-        wrongCount: data.wrongCount,
         duration: data.duration,
         subjects: data.subjects,
         createdBy: user.id,
@@ -170,7 +167,6 @@ export default function CreateExamForm() {
         classLevels: data.classLevels,
         examTypeId: data.examTypeId,
         code: data.code,
-        wrongCount: data.wrongCount,
         duration: data.duration,
         subjects: data.subjects,
         createdBy: user.id,
@@ -217,11 +213,18 @@ export default function CreateExamForm() {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div className="space-y-2">
               <Label htmlFor="classLevels">Sınıf Seviyesi</Label>
-              <Input
-                id="classLevels"
-                {...register("classLevels", { required: "Sınıf seviyesi gereklidir" })}
-                placeholder="örn: 9, 10, 11"
-              />
+              <Select onValueChange={(value) => setValue("classLevels", value)}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Sınıf seviyesi seçin" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="5">5. Sınıf</SelectItem>
+                  <SelectItem value="6">6. Sınıf</SelectItem>
+                  <SelectItem value="7">7. Sınıf</SelectItem>
+                  <SelectItem value="8">8. Sınıf</SelectItem>
+                </SelectContent>
+              </Select>
+              <input type="hidden" {...register("classLevels", { required: "Sınıf seviyesi gereklidir" })} />
               {errors.classLevels && <p className="text-sm text-red-600">{errors.classLevels.message}</p>}
             </div>
 
@@ -279,16 +282,7 @@ export default function CreateExamForm() {
               {errors.examTypeId && <p className="text-sm text-red-600">{errors.examTypeId.message}</p>}
             </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="wrongCount">Yanlış Sayım</Label>
-              <Input
-                id="wrongCount"
-                type="number"
-                {...register("wrongCount", { required: "Yanlış sayım gereklidir", min: 1 })}
-                placeholder="örn: 3"
-              />
-              {errors.wrongCount && <p className="text-sm text-red-600">{errors.wrongCount.message}</p>}
-            </div>
+
           </div>
 
           <div className="space-y-4">

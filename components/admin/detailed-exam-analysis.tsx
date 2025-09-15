@@ -10,6 +10,7 @@ import { useExamStore } from "@/lib/stores/exam-store"
 import { apiClient } from "@/lib/api-client"
 import { CheckCircle, XCircle, Minus, Download, BarChart3, Users, TrendingUp, Target, BookOpen, Award, RefreshCw } from "lucide-react"
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from "recharts"
+import { formatOgrenciNo } from "@/lib/utils"
 
 interface DetailedExamAnalysisProps {
   examId: string
@@ -415,7 +416,7 @@ export default function DetailedExamAnalysis({ examId, hideClassFilter = false }
                       <thead>
                         <tr className="bg-gray-50">
                           <th className="border border-gray-200 p-2 text-left text-xs">Sıra</th>
-                          <th className="border border-gray-200 p-2 text-left text-xs">TC Kimlik</th>
+                          <th className="border border-gray-200 p-2 text-left text-xs">Kitapçık Türü</th>
                           <th className="border border-gray-200 p-2 text-left text-xs">Öğrenci Adı</th>
                           <th className="border border-gray-200 p-2 text-left text-xs">Öğr. No</th>
                           <th className="border border-gray-200 p-2 text-left text-xs">Sınıf</th>
@@ -432,9 +433,9 @@ export default function DetailedExamAnalysis({ examId, hideClassFilter = false }
                           .map((student, index) => (
                             <tr key={index} className="hover:bg-gray-50">
                               <td className="border border-gray-200 p-2 font-bold text-sm">{index + 1}</td>
-                              <td className="border border-gray-200 p-2 text-xs font-mono">{student.tcKimlikNo || 'N/A'}</td>
+                              <td className="border border-gray-200 p-2 text-xs font-mono">{student.kitapcikTuru || 'N/A'}</td>
                               <td className="border border-gray-200 p-2 text-sm font-semibold">{student.ogrenciAdi || 'Bilinmeyen'}</td>
-                              <td className="border border-gray-200 p-2 text-sm">{student.ogrenciNo || 'N/A'}</td>
+                              <td className="border border-gray-200 p-2 text-sm">{formatOgrenciNo(student.ogrenciNo)}</td>
                               <td className="border border-gray-200 p-2 text-sm">{student.sinif || 'N/A'}</td>
                               <td className="border border-gray-200 p-2 text-sm">{student.sube || 'N/A'}</td>
                               <td className="border border-gray-200 p-2 text-green-600 font-semibold text-sm">{student.totalCorrect || 0}</td>
