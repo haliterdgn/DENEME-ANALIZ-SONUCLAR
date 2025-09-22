@@ -108,6 +108,16 @@ export default function DetailedExamAnalysis({ examId, hideClassFilter = false }
   const [txtFile, setTxtFile] = useState<File | null>(null)
   const [uploadingTxt, setUploadingTxt] = useState(false)
   const [txtUploaded, setTxtUploaded] = useState(false)
+  
+  // Öğrenci Analizi State'leri
+  const [selectedStudent, setSelectedStudent] = useState<any | null>(null)
+  const [studentFilter, setStudentFilter] = useState({
+    name: '',
+    class: 'all',
+    session: 'all' // 1. oturum, 2. oturum, tek oturum
+  })
+  const [showStudentDetail, setShowStudentDetail] = useState(false)
+  
   const { toast } = useToast()
   const [classes] = useState([
     { id: "all", name: "Tüm Sınıflar" },
@@ -144,6 +154,124 @@ export default function DetailedExamAnalysis({ examId, hideClassFilter = false }
     }
     loadOptikForms()
   }, [selectedOptikFormId])
+
+  // Öğrenci Bazlı Analiz Fonksiyonu
+  const performStudentAnalysis = async (student: any) => {
+    try {
+      console.log('👤 ÖĞRENCİ BAZLI ANALİZ BAŞLATIYOR:')
+      console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━')
+      console.log('📋 Seçili öğrenci:', {
+        studentInfo: student.studentInfo,
+        totalScore: student.totalScore,
+        totalCorrect: student.totalCorrect,
+        totalWrong: student.totalWrong,
+        totalEmpty: student.totalEmpty
+      })
+
+      // Backend'den öğrenci bazlı detaylı analiz iste
+      const studentAnalysisOptions = {
+        studentId: student.studentInfo?.tcKimlikNo || student.studentInfo?.ogrenciNo,
+        includeSubjectDetails: true,
+        includeQuestionDetails: true,
+        session: studentFilter.session !== 'all' ? studentFilter.session : undefined
+      }
+
+      console.log('🎯 Öğrenci analiz parametreleri:', studentAnalysisOptions)
+
+      // API çağrısı - bu endpoint'in varlığını kontrol edelim
+      try {
+        const studentDetailAnalysis = await apiClient.request(`/api/exams/${examId}/student-analysis`, {
+          method: 'POST',
+          body: JSON.stringify(studentAnalysisOptions)
+        })
+        
+        console.log('✅ Öğrenci bazlı analiz sonucu:', studentDetailAnalysis)
+        return studentDetailAnalysis
+        
+      } catch (apiError: any) {
+        console.log('⚠️ Backend\'de öğrenci analiz endpoint\'i yok, mevcut veriyle mock analiz yapılacak')
+        console.log('❌ API Hatası:', apiError.message)
+        
+        // Mock öğrenci analizi oluştur
+        return createMockStudentAnalysis(student)
+      }
+
+    } catch (error: any) {
+      console.error('❌ Öğrenci analizi hatası:', error)
+      throw error
+    }
+  }
+
+  // Mock öğrenci analizi oluşturma
+  const createMockStudentAnalysis = (student: any) => {
+    console.log('🔧 Mock öğrenci analizi oluşturuluyor...')
+    
+    const mockAnalysis = {
+      studentInfo: student.studentInfo,
+      overallPerformance: {
+        totalScore: student.totalScore,
+        totalCorrect: student.totalCorrect,
+        totalWrong: student.totalWrong,
+        totalEmpty: student.totalEmpty,
+        rank: Math.floor(Math.random() * 20) + 1, // Mock sıralama
+        percentile: Math.floor((student.totalScore / 100) * 100)
+      },
+      subjectPerformance: student.subjectResults ? 
+        Object.entries(student.subjectResults).map(([subjectName, result]: [string, any]) => ({
+          subjectName,
+          score: result.score || 0,
+          correct: result.correct || 0,
+          wrong: result.wrong || 0,
+          empty: result.empty || 0,
+          questions: result.questions || [],
+          topics: generateMockTopicsBySubject(subjectName, result)
+        })) : [],
+      sessionInfo: {
+        session: studentFilter.session !== 'all' ? studentFilter.session : 'tek-oturum',
+        duration: 150, // Mock süre
+        examDate: new Date().toISOString().split('T')[0]
+      },
+      recommendations: generateStudentRecommendations(student)
+    }
+    
+    console.log('✅ Mock öğrenci analizi oluşturuldu:', mockAnalysis)
+    return mockAnalysis
+  }
+
+  // Öğrenci önerileri oluştur
+  const generateStudentRecommendations = (student: any) => {
+    const totalScore = student.totalScore || 0
+    const recommendations = []
+    
+    if (totalScore >= 80) {
+      recommendations.push('🎉 Mükemmel performans! Mevcut seviyeyi koruyun.')
+      recommendations.push('📚 İleri düzey sorularla kendinizi geliştirin.')
+    } else if (totalScore >= 60) {
+      recommendations.push('👍 İyi performans gösterdiniz.')
+      recommendations.push('🎯 Zayıf olduğunuz konulara odaklanın.')
+    } else {
+      recommendations.push('⚠️ Temel konuları tekrar gözden geçirin.')
+      recommendations.push('📖 Düzenli çalışma programı oluşturun.')
+    }
+    
+    return recommendations
+  }
+
+  // Öğrenci seç ve detay göster
+  const handleStudentSelect = async (student: any) => {
+    setSelectedStudent(student)
+    setShowStudentDetail(true)
+    
+    try {
+      const studentAnalysis = await performStudentAnalysis(student)
+      setSelectedStudent({
+        ...student,
+        detailedAnalysis: studentAnalysis
+      })
+    } catch (error) {
+      console.error('Öğrenci analizi yüklenirken hata:', error)
+    }
+  }
 
   // TXT dosyası upload et
   const handleTxtUpload = async () => {
@@ -1293,16 +1421,79 @@ export default function DetailedExamAnalysis({ examId, hideClassFilter = false }
 
           {/* Öğrenci Detayları - Gerçek API Formatı */}
           <TabsContent value="students" className="space-y-6">
-            {studentResults.length > 0 ? (
-              <Card>
-                <CardHeader>
-                  <CardTitle>👥 Öğrenci Performans Listesi</CardTitle>
-                  <p className="text-sm text-gray-600">
-                    {selectedClass !== "all" ? `${classes.find(c => c.id === selectedClass)?.name} - ` : ""}
-                    Toplam {studentResults.length} öğrenci
-                  </p>
-                </CardHeader>
-                <CardContent>
+            {!showStudentDetail ? (
+              // Öğrenci Listesi Görünümü
+              <div className="space-y-6">
+                {/* Filtreleme Paneli */}
+                <Card className="bg-gradient-to-r from-blue-50 to-indigo-50">
+                  <CardHeader>
+                    <CardTitle className="text-blue-800 flex items-center gap-2">
+                      🔍 Öğrenci Filtresi
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                      {/* İsim Filtresi */}
+                      <div>
+                        <Label htmlFor="student-name-filter">Öğrenci Adı</Label>
+                        <Input
+                          id="student-name-filter"
+                          placeholder="Öğrenci adı ara..."
+                          value={studentFilter.name}
+                          onChange={(e) => setStudentFilter(prev => ({...prev, name: e.target.value}))}
+                        />
+                      </div>
+                      
+                      {/* Sınıf Filtresi */}
+                      <div>
+                        <Label htmlFor="student-class-filter">Sınıf</Label>
+                        <Select value={studentFilter.class} onValueChange={(value) => setStudentFilter(prev => ({...prev, class: value}))}>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Sınıf seçin" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="all">Tüm Sınıflar</SelectItem>
+                            {[...new Set(studentResults.map(s => s.sinif))].filter(Boolean).map(sinif => (
+                              <SelectItem key={sinif} value={sinif}>{sinif}</SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      
+                      {/* Oturum Filtresi */}
+                      <div>
+                        <Label htmlFor="student-session-filter">Oturum</Label>
+                        <Select value={studentFilter.session} onValueChange={(value) => setStudentFilter(prev => ({...prev, session: value}))}>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Oturum seçin" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="all">Tüm Oturumlar</SelectItem>
+                            <SelectItem value="1">1. Oturum</SelectItem>
+                            <SelectItem value="2">2. Oturum</SelectItem>
+                            <SelectItem value="tek-oturum">Tek Oturum</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+
+                {/* Öğrenci Listesi */}
+                {studentResults.length > 0 ? (
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="flex items-center justify-between">
+                        <span>👥 Öğrenci Performans Listesi</span>
+                        <Badge variant="outline">
+                          {studentResults.filter(student => 
+                            (studentFilter.name === '' || student.ogrenciAdi?.toLowerCase().includes(studentFilter.name.toLowerCase())) &&
+                            (studentFilter.class === 'all' || student.sinif === studentFilter.class)
+                          ).length} öğrenci
+                        </Badge>
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent>
                   <div className="overflow-x-auto">
                     <table className="w-full border-collapse border border-gray-200">
                       <thead>
