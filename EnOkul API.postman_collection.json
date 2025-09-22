@@ -2063,7 +2063,7 @@
 														},
 														{
 															"key": "optikFormId",
-															"value": "68be047d171e395a088e6a74",
+															"value": "68c7e7686fee6aeadf3e3fa4",
 															"description": "(Required) Kullanılacak optik form ID'si",
 															"type": "text"
 														}
@@ -2083,7 +2083,7 @@
 													"variable": [
 														{
 															"key": "id",
-															"value": "68bde5ef84ecb58041adbad3",
+															"value": "68c7e77a6fee6aeadf3e3fc2",
 															"description": "(Required) Sınav ID'si"
 														}
 													]
@@ -3717,7 +3717,7 @@
 								],
 								"body": {
 									"mode": "raw",
-									"raw": "{\n  \"optikFormId\": \"68be047d171e395a088e6a74\",\n  \"includeDetails\": true\n}",
+									"raw": "{\n  \"optikFormId\": \"68c7e7686fee6aeadf3e3fa4\",\n  \"includeDetails\": true\n}",
 									"options": {
 										"raw": {
 											"language": "json"
@@ -3738,7 +3738,238 @@
 									"variable": [
 										{
 											"key": "examId",
-											"value": "68bde5ef84ecb58041adbad3"
+											"value": "68c7e77a6fee6aeadf3e3fc2"
+										}
+									]
+								},
+								"description": "TXT'den gelen öğrenci cevaplarını Excel'deki doğru cevaplarla karşılaştırarak detaylı analiz yapar"
+							},
+							"response": [
+								{
+									"name": "Success Response (Detailed)",
+									"originalRequest": {
+										"method": "POST",
+										"header": [
+											{
+												"key": "Content-Type",
+												"value": "application/json",
+												"type": "text"
+											}
+										],
+										"body": {
+											"mode": "raw",
+											"raw": "{\n  \"optikFormId\": \"550e8400-e29b-41d4-a716-446655440000\",\n  \"includeDetails\": true\n}",
+											"options": {
+												"raw": {
+													"language": "json"
+												}
+											}
+										},
+										"url": {
+											"raw": "http://localhost:3000/api/exams/123e4567-e89b-12d3-a456-426614174000/analyze-results",
+											"protocol": "http",
+											"host": [
+												"localhost"
+											],
+											"port": "3000",
+											"path": [
+												"api",
+												"exams",
+												"123e4567-e89b-12d3-a456-426614174000",
+												"analyze-results"
+											]
+										}
+									},
+									"status": "OK",
+									"code": 200,
+									"_postman_previewlanguage": "Text",
+									"header": [
+										{
+											"key": "Content-Type",
+											"value": "application/json"
+										}
+									],
+									"cookie": [],
+									"body": "{\n  \"message\": \"Analiz başarıyla tamamlandı\",\n  \"examInfo\": {\n    \"examId\": \"123e4567-e89b-12d3-a456-426614174000\",\n    \"examName\": \"6. Sınıf Türkçe Sınavı\",\n    \"optikFormId\": \"550e8400-e29b-41d4-a716-446655440000\",\n    \"optikFormName\": \"6. Sınıf Standart Form\"\n  },\n  \"analysisStats\": {\n    \"totalStudents\": 150,\n    \"totalQuestions\": 40,\n    \"averageScore\": 72.5,\n    \"highestScore\": 95.2,\n    \"lowestScore\": 35.8,\n    \"passCount\": 125,\n    \"failCount\": 25\n  },\n  \"subjectAnalysis\": [\n    {\n      \"subjectName\": \"Türkçe\",\n      \"totalQuestions\": 20,\n      \"averageScore\": 68.5,\n      \"highestScore\": 100,\n      \"lowestScore\": 25,\n      \"totalCorrect\": 2055,\n      \"totalWrong\": 890,\n      \"totalEmpty\": 55,\n      \"studentCount\": 150\n    },\n    {\n      \"subjectName\": \"Matematik\",\n      \"totalQuestions\": 20,\n      \"averageScore\": 76.8,\n      \"highestScore\": 100,\n      \"lowestScore\": 40,\n      \"totalCorrect\": 2304,\n      \"totalWrong\": 634,\n      \"totalEmpty\": 62,\n      \"studentCount\": 150\n    }\n  ],\n  \"studentResults\": [\n    {\n      \"studentInfo\": {\n        \"tcKimlikNo\": \"12345678901\",\n        \"ogrenciAdi\": \"AHMET YİLMAZ\",\n        \"sinif\": \"6A\",\n        \"telefon\": \"05551234567\"\n      },\n      \"totalScore\": 85.5,\n      \"totalCorrect\": 34,\n      \"totalWrong\": 5,\n      \"totalEmpty\": 1,\n      \"subjectScores\": [\n        {\n          \"subjectName\": \"Türkçe\",\n          \"correct\": 17,\n          \"wrong\": 2,\n          \"empty\": 1,\n          \"score\": 85.0\n        },\n        {\n          \"subjectName\": \"Matematik\",\n          \"correct\": 17,\n          \"wrong\": 3,\n          \"empty\": 0,\n          \"score\": 85.0\n        }\n      ],\n      \"detailedAnswers\": [\n        {\n          \"questionNumber\": 1,\n          \"studentAnswer\": \"A\",\n          \"correctAnswer\": \"A\",\n          \"isCorrect\": true,\n          \"isEmpty\": false\n        }\n      ]\n    }\n  ]\n}"
+								},
+								{
+									"name": "Success Response (Summary Only)",
+									"originalRequest": {
+										"method": "POST",
+										"header": [
+											{
+												"key": "Content-Type",
+												"value": "application/json",
+												"type": "text"
+											}
+										],
+										"body": {
+											"mode": "raw",
+											"raw": "{\n  \"optikFormId\": \"550e8400-e29b-41d4-a716-446655440000\",\n  \"includeDetails\": false\n}",
+											"options": {
+												"raw": {
+													"language": "json"
+												}
+											}
+										},
+										"url": {
+											"raw": "http://localhost:3000/api/exams/123e4567-e89b-12d3-a456-426614174000/analyze-results",
+											"protocol": "http",
+											"host": [
+												"localhost"
+											],
+											"port": "3000",
+											"path": [
+												"api",
+												"exams",
+												"123e4567-e89b-12d3-a456-426614174000",
+												"analyze-results"
+											]
+										}
+									},
+									"status": "OK",
+									"code": 200,
+									"_postman_previewlanguage": "Text",
+									"header": [
+										{
+											"key": "Content-Type",
+											"value": "application/json"
+										}
+									],
+									"cookie": [],
+									"body": "{\n  \"message\": \"Analiz başarıyla tamamlandı\",\n  \"examInfo\": {\n    \"examId\": \"123e4567-e89b-12d3-a456-426614174000\",\n    \"examName\": \"6. Sınıf Türkçe Sınavı\",\n    \"optikFormId\": \"550e8400-e29b-41d4-a716-446655440000\",\n    \"optikFormName\": \"6. Sınıf Standart Form\"\n  },\n  \"analysisStats\": {\n    \"totalStudents\": 150,\n    \"totalQuestions\": 40,\n    \"averageScore\": 72.5,\n    \"highestScore\": 95.2,\n    \"lowestScore\": 35.8,\n    \"passCount\": 125,\n    \"failCount\": 25\n  },\n  \"subjectAnalysis\": [\n    {\n      \"subjectName\": \"Türkçe\",\n      \"totalQuestions\": 20,\n      \"averageScore\": 68.5,\n      \"highestScore\": 100,\n      \"lowestScore\": 25,\n      \"totalCorrect\": 2055,\n      \"totalWrong\": 890,\n      \"totalEmpty\": 55,\n      \"studentCount\": 150\n    }\n  ],\n  \"studentResults\": [\n    {\n      \"studentInfo\": {\n        \"tcKimlikNo\": \"12345678901\",\n        \"ogrenciAdi\": \"AHMET YİLMAZ\",\n        \"sinif\": \"6A\",\n        \"telefon\": \"05551234567\"\n      },\n      \"totalScore\": 85.5,\n      \"totalCorrect\": 34,\n      \"totalWrong\": 5,\n      \"totalEmpty\": 1,\n      \"subjectScores\": [\n        {\n          \"subjectName\": \"Türkçe\",\n          \"correct\": 17,\n          \"wrong\": 2,\n          \"empty\": 1,\n          \"score\": 85.0\n        }\n      ]\n    }\n  ]\n}"
+								},
+								{
+									"name": "Exam Not Found",
+									"originalRequest": {
+										"method": "POST",
+										"header": [
+											{
+												"key": "Content-Type",
+												"value": "application/json",
+												"type": "text"
+											}
+										],
+										"body": {
+											"mode": "raw",
+											"raw": "{\n  \"optikFormId\": \"550e8400-e29b-41d4-a716-446655440000\"\n}",
+											"options": {
+												"raw": {
+													"language": "json"
+												}
+											}
+										},
+										"url": {
+											"raw": "http://localhost:3000/api/exams/nonexistent-exam-id/analyze-results",
+											"protocol": "http",
+											"host": [
+												"localhost"
+											],
+											"port": "3000",
+											"path": [
+												"api",
+												"exams",
+												"nonexistent-exam-id",
+												"analyze-results"
+											]
+										}
+									},
+									"status": "Not Found",
+									"code": 404,
+									"_postman_previewlanguage": "Text",
+									"header": [
+										{
+											"key": "Content-Type",
+											"value": "application/json"
+										}
+									],
+									"cookie": [],
+									"body": "{\n  \"error\": \"Exam not found\"\n}"
+								},
+								{
+									"name": "Missing Excel Data",
+									"originalRequest": {
+										"method": "POST",
+										"header": [
+											{
+												"key": "Content-Type",
+												"value": "application/json",
+												"type": "text"
+											}
+										],
+										"body": {
+											"mode": "raw",
+											"raw": "{\n  \"optikFormId\": \"550e8400-e29b-41d4-a716-446655440000\"\n}",
+											"options": {
+												"raw": {
+													"language": "json"
+												}
+											}
+										},
+										"url": {
+											"raw": "http://localhost:3000/api/exams/123e4567-e89b-12d3-a456-426614174000/analyze-results",
+											"protocol": "http",
+											"host": [
+												"localhost"
+											],
+											"port": "3000",
+											"path": [
+												"api",
+												"exams",
+												"123e4567-e89b-12d3-a456-426614174000",
+												"analyze-results"
+											]
+										}
+									},
+									"status": "Not Found",
+									"code": 404,
+									"_postman_previewlanguage": "Text",
+									"header": [
+										{
+											"key": "Content-Type",
+											"value": "application/json"
+										}
+									],
+									"cookie": [],
+									"body": "{\n  \"error\": \"Exam content not found. Please upload Excel file first.\"\n}"
+								}
+							]
+						},
+						{
+							"name": "topic-analysis",
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"optikFormId\": \"68c7e7686fee6aeadf3e3fa4\",\n  \"includeDetails\": false\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{baseUrl}}/api/exams/:examId/topic-analysis",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"api",
+										"exams",
+										":examId",
+										"topic-analysis"
+									],
+									"variable": [
+										{
+											"key": "examId",
+											"value": "68c7e77a6fee6aeadf3e3fc2"
 										}
 									]
 								},

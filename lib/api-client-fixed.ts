@@ -1,4 +1,4 @@
-  const API_BASE_URL = 'http://172.28.107.97:3001'
+const API_BASE_URL = 'http://172.28.107.97:3001'
 
 // API Types
 interface ApiResponse<T = any> {
@@ -127,29 +127,7 @@ class ApiClient {
       return await response.json()
     } catch (error) {
       console.error(`❌ API Error [${options.method || 'GET'} ${url}]:`, error)
-      
-      // Network hatası için offline fallback
-      if (error instanceof TypeError && (error.message.includes('Failed to fetch') || error.message.includes('NetworkError'))) {
-        console.warn('🔌 Network hatası - offline fallback kullanılıyor')
-        return this.getOfflineFallback(endpoint, options.method || 'GET')
-      }
-      
       throw error
-    }
-  }
-
-  // Offline fallback data
-  private getOfflineFallback(endpoint: string, method: string): any {
-    // GET istekleri için boş array döndür
-    if (method === 'GET') {
-      return []
-    }
-    
-    // POST/PUT/DELETE için success response döndür
-    return {
-      success: true,
-      message: 'Offline mode - operation simulated',
-      id: 'offline-' + Date.now()
     }
   }
 
@@ -177,7 +155,24 @@ class ApiClient {
   // RESULTS PRE-CHECK
   // =====================================
   
-  // Not: checkStudentResults metodu kaldırıldı - gereksiz API çağrısı yapıyordu
+  // Sınav için öğrenci sonuçlarının yüklenip yüklenmediğini kontrol et
+  async checkStudentResults(examId: string): Promise<{ hasResults: boolean, message?: string }> {
+    try {
+      // Önce results status kontrol et (eğer böyle bir endpoint varsa)
+      const result = await this.request(`/api/exams/${examId}/results/status`, {
+        method: 'GET'
+      })
+      return { hasResults: true, message: 'Öğrenci sonuçları mevcut' }
+    } catch (error: any) {
+      // 404 veya "No student results" mesajı varsa
+      if (error.message.includes('404') || error.message.toLowerCase().includes('no student results')) {
+        return { hasResults: false, message: 'Öğrenci sonuçları henüz yüklenmemiş' }
+      }
+      
+      // Başka bir hata varsa tekrar fırlat
+      throw error
+    }
+  }
 
   // =====================================
   // ANALYSIS WITH PRE-CHECK
@@ -209,60 +204,6 @@ class ApiClient {
       })
       
       console.log('✅ Analiz başarıyla tamamlandı')
-      
-      // 🔍 Backend'den gelen veriyi detaylıca loglayalım
-      console.log('📊 BACKEND VERİ YAPISI DETAY:')
-      console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━')
-      
-      if (result) {
-        // Ana yapı
-        console.log('🏗️ Ana veri yapısı:', Object.keys(result))
-        
-        // Exam Info
-        if (result.examInfo) {
-          console.log('📋 examInfo içeriği:', result.examInfo)
-        }
-        
-        // Analysis Stats
-        if (result.analysisStats) {
-          console.log('📈 analysisStats içeriği:', result.analysisStats)
-        }
-        
-        // Subject Analysis - En önemlisi!
-        if (result.subjectAnalysis) {
-          console.log('📚 subjectAnalysis array uzunluğu:', result.subjectAnalysis.length)
-          
-          result.subjectAnalysis.forEach((subject: any, index: number) => {
-            console.log(`📖 Ders ${index + 1}:`, {
-              subjectName: subject.subjectName,
-              keys: Object.keys(subject),
-              topicAnalysis: subject.topicAnalysis ? 'VAR ✅' : 'YOK ❌',
-              difficultyAnalysis: subject.difficultyAnalysis ? 'VAR ✅' : 'YOK ❌'
-            })
-            
-            // Eğer konu analizi varsa detayını göster
-            if (subject.topicAnalysis && subject.topicAnalysis.length > 0) {
-              console.log(`🎯 ${subject.subjectName} konu listesi:`)
-              subject.topicAnalysis.forEach((topic: any, tIndex: number) => {
-                console.log(`   Konu ${tIndex + 1}:`, topic)
-              })
-            }
-          })
-        }
-        
-        // Student Results
-        if (result.studentResults) {
-          console.log('👥 studentResults array uzunluğu:', result.studentResults.length)
-          if (result.studentResults.length > 0) {
-            console.log('👤 İlk öğrenci örneği:', result.studentResults[0])
-          }
-        }
-        
-        console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━')
-      } else {
-        console.log('❌ Backend\'den veri gelmedi!')
-      }
-      
       return result
     } catch (error: any) {
       console.error('❌ Analiz hatası:', error)
@@ -376,121 +317,6 @@ class ApiClient {
     return this.request(`/api/exams/${id}`, {
       method: 'DELETE'
     })
-  }
-
-  // =====================================
-  // EXAM TYPES
-  // =====================================
-  async getExamTypes(): Promise<any[]> {
-    try {
-      const result = await this.request('/api/exam-types')
-      return result || []
-    } catch (error) {
-      console.warn('⚠️ Sınav tipleri offline modda çalışıyor')
-      // Offline fallback - örnek sınav tipleri
-      return [
-        {
-          id: 'offline-1',
-          _id: 'offline-1',
-          name: 'TYT Deneme',
-          typeName: 'TYT Deneme',
-          description: 'Temel Yeterlilik Testi',
-          subjects: ['Türkçe', 'Matematik', 'Fen', 'Sosyal'],
-          totalDuration: 165,
-          totalQuestions: 120,
-          isActive: true
-        },
-        {
-          id: 'offline-2', 
-          _id: 'offline-2',
-          name: 'AYT Deneme',
-          typeName: 'AYT Deneme', 
-          description: 'Alan Yeterlilik Testi',
-          subjects: ['Matematik', 'Fizik', 'Kimya', 'Biyoloji'],
-          totalDuration: 180,
-          totalQuestions: 80,
-          isActive: true
-        }
-      ]
-    }
-  }
-
-  async createExamType(data: any): Promise<any> {
-    try {
-      return await this.request('/api/exam-types', {
-        method: 'POST',
-        body: JSON.stringify(data)
-      })
-    } catch (error) {
-      console.warn('⚠️ Sınav tipi oluşturma offline modda simüle edildi')
-      return {
-        success: true,
-        id: 'offline-' + Date.now(),
-        message: 'Sınav tipi offline modda oluşturuldu',
-        ...data
-      }
-    }
-  }
-
-  async updateExamType(id: string, data: any): Promise<any> {
-    try {
-      return await this.request(`/api/exam-types/${id}`, {
-        method: 'PUT',
-        body: JSON.stringify(data)
-      })
-    } catch (error) {
-      console.warn('⚠️ Sınav tipi güncelleme offline modda simüle edildi')
-      return {
-        success: true,
-        id,
-        message: 'Sınav tipi offline modda güncellendi',
-        ...data
-      }
-    }
-  }
-
-  async deleteExamType(id: string): Promise<any> {
-    try {
-      return await this.request(`/api/exam-types/${id}`, {
-        method: 'DELETE'
-      })
-    } catch (error) {
-      console.warn('⚠️ Sınav tipi silme offline modda simüle edildi')
-      return {
-        success: true,
-        id,
-        message: 'Sınav tipi offline modda silindi'
-      }
-    }
-  }
-
-  // =====================================
-  // STUDENT RESULTS
-  // =====================================
-  
-  async getStudentResults(examId: string, params?: {
-    optikFormId?: string
-    limit?: number
-    skip?: number
-  }): Promise<any> {
-    try {
-      const queryParams = new URLSearchParams()
-      if (params?.optikFormId) queryParams.set('optikFormId', params.optikFormId)
-      if (params?.limit) queryParams.set('limit', params.limit.toString())
-      if (params?.skip) queryParams.set('skip', params.skip.toString())
-      
-      const queryString = queryParams.toString()
-      const endpoint = `/api/exams/${examId}/student-results${queryString ? `?${queryString}` : ''}`
-      
-      console.log('📊 Öğrenci sonuçları çekiliyor:', { examId, params })
-      const result = await this.request(endpoint)
-      console.log('✅ Öğrenci sonuçları alındı:', result?.length || 0, 'sonuç')
-      return result || []
-    } catch (error: any) {
-      console.error('❌ Öğrenci sonuçları getirme hatası:', error)
-      // Offline fallback
-      return []
-    }
   }
 
   // =====================================
