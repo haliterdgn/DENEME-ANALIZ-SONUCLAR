@@ -474,6 +474,11 @@ class ApiClient {
     skip?: number
   }): Promise<any> {
     try {
+      // If no specific params, try to get all results using pagination
+      if (!params || (!params.limit && !params.skip)) {
+        return await this.getAllStudentResults(examId, params?.optikFormId)
+      }
+      
       const queryParams = new URLSearchParams()
       if (params?.optikFormId) queryParams.set('optikFormId', params.optikFormId)
       if (params?.limit) queryParams.set('limit', params.limit.toString())
@@ -484,12 +489,147 @@ class ApiClient {
       
       console.log('📊 Öğrenci sonuçları çekiliyor:', { examId, params })
       const result = await this.request(endpoint)
-      console.log('✅ Öğrenci sonuçları alındı:', result?.length || 0, 'sonuç')
-      return result || []
+      console.log('✅ API Response:', { 
+        resultsCount: result?.results?.length || 0, 
+        totalCount: result?.totalCount || 0,
+        hasMore: result?.hasMore,
+        resultType: typeof result,
+        isArray: Array.isArray(result)
+      })
+      
+      // Return the results array, not the wrapper object
+      return result?.results || result || []
     } catch (error: any) {
       console.error('❌ Öğrenci sonuçları getirme hatası:', error)
       // Offline fallback
       return []
+    }
+  }
+
+  // Helper method to get all student results using pagination
+  private async getAllStudentResults(examId: string, optikFormId?: string): Promise<any[]> {
+    let allResults: any[] = []
+    let skip = 0
+    const limit = 50 // API default batch size
+    let hasMore = true
+
+    console.log('🔄 Fetching all student results with pagination...')
+    
+    while (hasMore) {
+      try {
+        const queryParams = new URLSearchParams()
+        if (optikFormId) queryParams.set('optikFormId', optikFormId)
+        queryParams.set('limit', limit.toString())
+        queryParams.set('skip', skip.toString())
+        
+        const queryString = queryParams.toString()
+        const endpoint = `/api/exams/${examId}/student-results?${queryString}`
+        
+        console.log(`📄 Fetching batch: skip=${skip}, limit=${limit}`)
+        const result = await this.request(endpoint)
+        
+        if (result?.results && Array.isArray(result.results)) {
+          allResults = [...allResults, ...result.results]
+          
+          console.log(`✅ Batch loaded: ${result.results.length} students (total so far: ${allResults.length})`)
+          
+          // Check if there are more results
+          hasMore = result.hasMore === true || result.results.length === limit
+          skip += limit
+          
+          // Safety check to prevent infinite loops
+          if (skip > 10000) {
+            console.warn('⚠️ Reached maximum pagination limit')
+            break
+          }
+        } else {
+          console.log('❌ No more results or invalid response format')
+          hasMore = false
+        }
+      } catch (error) {
+        console.error('❌ Error in pagination batch:', error)
+        hasMore = false
+      }
+    }
+    
+    console.log(`🎉 All student results loaded: ${allResults.length} total students`)
+    return allResults
+  }
+
+  // Exam content (cevap anahtarı) getirme
+  async getExamContent(examId: string) {
+    try {
+      console.log('📚 Exam content çekiliyor:', { examId })
+      const result = await this.request(`/api/exams/${examId}/content`)
+      
+      if (result?.questions) {
+        // Map API format to expected component format
+        result.questions = result.questions.map((q: any) => ({
+          ...q,
+          soruno: q.rowNumber,
+          ders: q.dersAdi,
+          dogru_cevap: q.dogruCevap
+        }))
+      }
+      
+      console.log('✅ Exam content alındı:', result?.questions?.length || 0, 'soru')
+      return result || null
+    } catch (error: any) {
+      console.error('❌ Exam content getirme hatası:', error)
+      return null
+    }
+  }
+
+  // Student Analysis (öğrenci bazlı analiz) getirme
+  async getStudentAnalysis(examId: string, studentId: string) {
+    try {
+      console.log('👨‍🎓 Student analysis çekiliyor:', { examId, studentId })
+      
+      // Önce student results'dan optik form ID'yi ve öğrenci no'yu bulalım
+      const studentResults = await this.getStudentResults(examId)
+      console.log('🔍 Student results yapısı:', { studentResults, type: typeof studentResults, isArray: Array.isArray(studentResults) })
+      
+      // studentResults direkt array olarak dönüyor
+      const student = Array.isArray(studentResults) 
+        ? studentResults.find((s: any) => s.id === studentId)
+        : null
+      
+      if (!student) {
+        console.error('❌ Öğrenci bulunamadı. Aranılan ID:', studentId)
+        console.error('📋 Mevcut öğrenci ID\'leri:', Array.isArray(studentResults) ? studentResults.map((s: any) => s.id) : 'Veri array değil')
+        throw new Error(`Öğrenci bulunamadı: ${studentId}`)
+      }
+      
+      // Veri doğrulaması
+      if (!student.optikFormId) {
+        throw new Error('Optik form ID bulunamadı')
+      }
+      
+      if (!student.studentInfo?.ogrenciNo) {
+        throw new Error('Öğrenci numarası bulunamadı')
+      }
+      
+      const requestData = {
+        optikFormId: student.optikFormId,
+        studentNo: student.studentInfo.ogrenciNo,  // API studentNo alanını bekliyor
+        oturum: student.oturum || 'tek'
+      }
+      
+      console.log('📤 Gönderilen student analysis verisi:', requestData)
+      console.log('👤 Bulunan student verisi:', student)
+      
+      const result = await this.request(`/api/exams/${examId}/student-analysis`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(requestData)
+      })
+      console.log('✅ Student analysis alındı:', result?.studentInfo?.ogrenciAdi || 'Bilinmeyen')
+      return result || null
+    } catch (error: any) {
+      console.error('❌ Student analysis getirme hatası:', error)
+      throw error
     }
   }
 

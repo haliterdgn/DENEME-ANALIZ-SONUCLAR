@@ -6,8 +6,10 @@ interface ExamStore {
   exams: any[]
   booklets: any[]
   results: any[]
+  selectedExam: any | null
   // Local methods
   addExam: (examData: any) => void
+  setSelectedExam: (exam: any) => void
   addBooklet: (bookletData: any) => void
   addResult: (resultData: any) => void
   getExamById: (id: string) => any | undefined
@@ -34,8 +36,10 @@ export const useExamStore = create<ExamStore>()(
       exams: [], // API'den çekilecek
       booklets: [], // API'den çekilecek  
       results: [], // API'den çekilecek
+      selectedExam: null,
 
       // Local methods
+      setSelectedExam: (exam: any) => set({ selectedExam: exam }),
       addExam: (examData: any) => {
         const exam = {
           ...examData,
@@ -231,7 +235,7 @@ export const useExamStore = create<ExamStore>()(
           const exam = get().exams.find((e: any) => e.id === examId)
           const mongoId = exam?._id || examId
           
-          const analysis = await apiClient.analyzeExamResults(mongoId, data)
+          const analysis = await apiClient.analyzeResults(mongoId, data)
           return analysis
         } catch (error) {
           console.error('Error analyzing exam results:', error)

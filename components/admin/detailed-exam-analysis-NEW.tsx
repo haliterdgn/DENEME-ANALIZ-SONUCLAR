@@ -38,94 +38,34 @@ interface StudentResult {
   }[];
 }
 
-interface DetailedExamAnalysisProps {
-  examId?: string;
-}
-
-const DetailedExamAnalysis = ({ examId }: DetailedExamAnalysisProps) => {
+const DetailedExamAnalysis = () => {
   const { selectedExam } = useExamStore()
   const [examContent, setExamContent] = useState<ExamContent | null>(null)
   const [studentResults, setStudentResults] = useState<StudentResult[]>([])
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [analysisData, setAnalysisData] = useState<any>(null)
-  const [selectedOptikFormId, setSelectedOptikFormId] = useState<string>("")
-  const [optikForms, setOptikForms] = useState<any[]>([])
-
-  // Get active exam ID (either from props or store)
-  const activeExamId = examId || selectedExam?.id
-
-  // Load optik forms
-  useEffect(() => {
-    const loadOptikForms = async () => {
-      try {
-        const forms = await apiClient.getOptikForms()
-        console.log('📋 Optik formlar yüklendi:', forms)
-        setOptikForms(forms || [])
-        
-        // Veri olan optik formu otomatik seç (eğer seçili değilse)
-        if (forms && forms.length > 0 && !selectedOptikFormId && activeExamId) {
-          let bestFormId = null
-          
-          // Her optik form için öğrenci sayısını kontrol et
-          for (const form of forms) {
-            const formId = form._id || form.id
-            try {
-              const results = await apiClient.getStudentResults(activeExamId, { 
-                optikFormId: formId,
-                limit: 1 
-              })
-              
-              const studentCount = results?.totalCount || results?.length || 0
-              console.log(`📊 Optik form ${formId}: ${studentCount} öğrenci`)
-              
-              if (studentCount > 0) {
-                bestFormId = formId
-                break // İlk veri olan formu seç
-              }
-            } catch (error) {
-              console.warn(`⚠️ Optik form ${formId} kontrol edilemedi:`, error)
-            }
-          }
-          
-          // Eğer veri olan form bulunamazsa, ilk formu seç
-          const selectedForm = bestFormId || forms[0]._id || forms[0].id
-          setSelectedOptikFormId(selectedForm)
-          console.log('🎯 Optik form otomatik seçildi:', selectedForm, bestFormId ? '(veri var)' : '(varsayılan)')
-        }
-      } catch (error) {
-        console.error('❌ Optik formlar yüklenemedi:', error)
-        setOptikForms([])
-      }
-    }
-    
-    if (activeExamId) {
-      loadOptikForms()
-    }
-  }, [])
 
   // Load exam data
   useEffect(() => {
-    if (activeExamId && selectedOptikFormId) {
+    if (selectedExam?.id) {
       loadExamData()
     }
-  }, [activeExamId, selectedOptikFormId])
+  }, [selectedExam])
 
   const loadExamData = async () => {
-    if (!activeExamId) return
+    if (!selectedExam?.id) return
 
     setLoading(true)
     setError(null)
 
     try {
-      console.log('📥 Loading exam data for:', { examId: activeExamId, optikFormId: selectedOptikFormId })
+      console.log('📥 Loading exam data for:', selectedExam.id)
       
-      // Load exam content and student results with optik form ID
+      // Load exam content and student results
       const [contentResponse, resultsResponse] = await Promise.all([
-        apiClient.getExamContent(activeExamId),
-        apiClient.getStudentResults(activeExamId, { 
-          optikFormId: selectedOptikFormId 
-        })
+        apiClient.getExamContent(selectedExam.id),
+        apiClient.getStudentResults(selectedExam.id)
       ])
 
       console.log('📊 Exam content loaded:', contentResponse)
@@ -204,62 +144,28 @@ const DetailedExamAnalysis = ({ examId }: DetailedExamAnalysisProps) => {
           let qCorrect = 0, qWrong = 0, qEmpty = 0
 
           // Check each student's answer to this question
-          results.forEach((student, studentIdx) => {
+          results.forEach(student => {
             if (!student.subjectAnswers) return
 
             const subjectAnswer = student.subjectAnswers.find((sa: any) => 
-              sa.subjectName?.trim() === subjectName?.trim()
+              sa.subjectName === subjectName
             )
-            
-            // Debug log for first student and first question of each subject
-            if (studentIdx === 0 && topicQuestions.indexOf(question) === 0) {
-              console.log(`🔍 ${subjectName} - ${topicName} eşleştirmesi:`, {
-                questionSubject: subjectName,
-                availableSubjects: student.subjectAnswers.map((sa: any) => sa.subjectName),
-                foundMatch: !!subjectAnswer,
-                questionNumber: questionNumber,
-                correctAnswer: correctAnswer
-              })
-            }
             
             if (subjectAnswer?.answers) {
               const answers = subjectAnswer.answers
-              
-              // Calculate position in answer string for this subject
-              // Find the minimum question number for this subject to calculate offset
-              const subjectQuestions = examContent.questions.filter((q: any) => q.ders === subjectName)
-              const minQuestionNumber = Math.min(...subjectQuestions.map((q: any) => q.soruno))
-              const questionIndex = questionNumber - minQuestionNumber
-              
-              // Debug for first student
-              if (studentIdx === 0 && topicQuestions.indexOf(question) === 0) {
-                console.log(`📝 ${subjectName} cevap detayı:`, {
-                  answersString: answers,
-                  answerLength: answers.length,
-                  questionNumber: questionNumber,
-                  minQuestionForSubject: minQuestionNumber,
-                  calculatedIndex: questionIndex,
-                  studentAnswer: answers[questionIndex],
-                  correctAnswer: correctAnswer,
-                  startPos: subjectAnswer.startPosition
-                })
-              }
+              const questionIndex = questionNumber - 1
               
               if (questionIndex >= 0 && questionIndex < answers.length) {
                 const studentAnswer = answers[questionIndex]
                 
-                if (!studentAnswer || studentAnswer.trim() === '' || studentAnswer === ' ') {
+                if (!studentAnswer || studentAnswer.trim() === '') {
                   qEmpty++
                 } else if (studentAnswer.toLowerCase() === correctAnswer?.toLowerCase()) {
                   qCorrect++
                 } else {
                   qWrong++
                 }
-              } else {
-                qEmpty++ // Question index out of bounds
               }
-            } else {
-              qEmpty++ // No answers found for this subject
             }
           })
 
@@ -296,12 +202,8 @@ const DetailedExamAnalysis = ({ examId }: DetailedExamAnalysisProps) => {
           )
           
           if (subjectAnswer?.answers) {
-            // Calculate proper question index for this subject
-            const subjectQuestions = examContent.questions.filter((q: any) => q.ders === subjectName)
-            const minQuestionNumber = Math.min(...subjectQuestions.map((q: any) => q.soruno))
-            
             topicQuestions.forEach((question: any) => {
-              const questionIndex = question.soruno - minQuestionNumber
+              const questionIndex = question.soruno - 1
               if (questionIndex >= 0 && questionIndex < subjectAnswer.answers.length) {
                 const studentAnswer = subjectAnswer.answers[questionIndex]
                 if (studentAnswer?.toLowerCase() === question.dogru_cevap?.toLowerCase()) {
@@ -403,7 +305,7 @@ const DetailedExamAnalysis = ({ examId }: DetailedExamAnalysisProps) => {
     return {
       message: "Konu analizi başarıyla tamamlandı",
       examInfo: {
-        examId: activeExamId || 'unknown',
+        examId: selectedExam?.id || 'unknown',
         examName: examContent?.examName || selectedExam?.examName || 'Bilinmeyen Sınav',
         date: new Date().toISOString().split('T')[0],
         optikFormId: examContent?.optikFormId || 'unknown',
@@ -468,7 +370,7 @@ const DetailedExamAnalysis = ({ examId }: DetailedExamAnalysisProps) => {
     )
   }
 
-  if (!activeExamId) {
+  if (!analysisData) {
     return (
       <Card className="p-6">
         <div className="text-center text-gray-500">
@@ -478,43 +380,6 @@ const DetailedExamAnalysis = ({ examId }: DetailedExamAnalysisProps) => {
       </Card>
     )
   }
-
-  if (!analysisData && !loading) {
-    return (
-      <Card className="p-6">
-        <div className="text-center text-gray-500">
-          <FileText className="h-8 w-8 mx-auto mb-2" />
-          <p>Veri yükleniyor...</p>
-        </div>
-      </Card>
-    )
-  }
-
-  // Prepare pie chart data for overall statistics
-  const overallPieData = analysisData ? [
-    { 
-      name: 'Başarılı Konular', 
-      value: Math.round(analysisData.overallStats.averageTopicSuccess), 
-      color: '#10B981' 
-    },
-    { 
-      name: 'Geliştirilecek Konular', 
-      value: Math.round(100 - analysisData.overallStats.averageTopicSuccess), 
-      color: '#EF4444' 
-    }
-  ] : []
-
-  // Prepare pie chart data for subjects
-  const subjectsPieData = analysisData ? Object.keys(analysisData.subjectSummary).map(subject => {
-    const subjectData = analysisData.subjectSummary[subject]
-    return {
-      name: subject,
-      data: [
-        { name: 'Başarılı', value: Math.round(subjectData.averageSuccessRate), color: '#10B981' },
-        { name: 'Geliştirilecek', value: Math.round(100 - subjectData.averageSuccessRate), color: '#EF4444' }
-      ]
-    }
-  }) : []
 
   return (
     <div className="space-y-6">
@@ -531,161 +396,39 @@ const DetailedExamAnalysis = ({ examId }: DetailedExamAnalysisProps) => {
             <p><strong>Tarih:</strong> {analysisData.examInfo.date}</p>
           </div>
         </CardHeader>
-        <CardContent>
-          <div className="mb-4">
-            <label className="block text-sm font-medium mb-2">
-              Optik Form Seçin:
-            </label>
-            <Select 
-              value={selectedOptikFormId} 
-              onValueChange={setSelectedOptikFormId}
-            >
-              <SelectTrigger className="w-full max-w-md">
-                <SelectValue placeholder="Optik form seçin..." />
-              </SelectTrigger>
-              <SelectContent>
-                {optikForms.map((form) => (
-                  <SelectItem key={form._id || form.id} value={form._id || form.id}>
-                    <div className="flex flex-col">
-                      <span>{form.name}</span>
-                      <span className="text-xs text-gray-500">
-                        {form.totalQuestions} soru • {form.subjects?.length || 0} ders
-                      </span>
-                    </div>
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-            {optikForms.length === 0 && (
-              <p className="text-sm text-orange-600 mt-1">
-                Optik form bulunamadı.
-              </p>
-            )}
-          </div>
-        </CardContent>
       </Card>
 
       {/* Overall Stats */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Stats Cards */}
-        <div className="grid grid-cols-2 gap-4">
-          <Card>
-            <CardContent className="p-4 text-center">
-              <Users className="h-8 w-8 text-blue-500 mx-auto mb-2" />
-              <div className="text-2xl font-bold">{analysisData.overallStats.totalStudents}</div>
-              <div className="text-sm text-gray-500">Toplam Öğrenci</div>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardContent className="p-4 text-center">
-              <FileText className="h-8 w-8 text-green-500 mx-auto mb-2" />
-              <div className="text-2xl font-bold">{analysisData.overallStats.totalQuestions}</div>
-              <div className="text-sm text-gray-500">Toplam Soru</div>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardContent className="p-4 text-center">
-              <TrendingUp className="h-8 w-8 text-purple-500 mx-auto mb-2" />
-              <div className="text-2xl font-bold">{analysisData.overallStats.totalTopics}</div>
-              <div className="text-sm text-gray-500">Toplam Konu</div>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardContent className="p-4 text-center">
-              <CheckCircle className="h-8 w-8 text-orange-500 mx-auto mb-2" />
-              <div className="text-2xl font-bold">{analysisData.overallStats.averageTopicSuccess.toFixed(1)}%</div>
-              <div className="text-sm text-gray-500">Ortalama Başarı</div>
-            </CardContent>
-          </Card>
-        </div>
-
-        {/* Overall Performance Pie Chart */}
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
         <Card>
-          <CardHeader>
-            <CardTitle>Genel Başarı Dağılımı</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="flex justify-center">
-              <div className="w-48 h-48">
-                <ResponsiveContainer width="100%" height="100%">
-                  <PieChart>
-                    <Pie
-                      data={overallPieData}
-                      cx="50%"
-                      cy="50%"
-                      innerRadius={60}
-                      outerRadius={80}
-                      paddingAngle={5}
-                      dataKey="value"
-                    >
-                      {overallPieData.map((entry, index) => (
-                        <Cell key={`cell-${index}`} fill={entry.color} />
-                      ))}
-                    </Pie>
-                    <Tooltip 
-                      formatter={(value) => [`%${value}`, 'Başarı Oranı']}
-                    />
-                  </PieChart>
-                </ResponsiveContainer>
-              </div>
-            </div>
-            <div className="mt-4 flex justify-center gap-4 text-sm">
-              <div className="flex items-center gap-2">
-                <div className="w-3 h-3 bg-green-500 rounded-full"></div>
-                <span>Başarılı</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <div className="w-3 h-3 bg-red-500 rounded-full"></div>
-                <span>Geliştirilecek</span>
-              </div>
-            </div>
+          <CardContent className="p-4 text-center">
+            <Users className="h-8 w-8 text-blue-500 mx-auto mb-2" />
+            <div className="text-2xl font-bold">{analysisData.overallStats.totalStudents}</div>
+            <div className="text-sm text-gray-500">Toplam Öğrenci</div>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardContent className="p-4 text-center">
+            <FileText className="h-8 w-8 text-green-500 mx-auto mb-2" />
+            <div className="text-2xl font-bold">{analysisData.overallStats.totalQuestions}</div>
+            <div className="text-sm text-gray-500">Toplam Soru</div>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardContent className="p-4 text-center">
+            <TrendingUp className="h-8 w-8 text-purple-500 mx-auto mb-2" />
+            <div className="text-2xl font-bold">{analysisData.overallStats.totalTopics}</div>
+            <div className="text-sm text-gray-500">Toplam Konu</div>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardContent className="p-4 text-center">
+            <CheckCircle className="h-8 w-8 text-orange-500 mx-auto mb-2" />
+            <div className="text-2xl font-bold">{analysisData.overallStats.averageTopicSuccess.toFixed(1)}%</div>
+            <div className="text-sm text-gray-500">Ortalama Başarı</div>
           </CardContent>
         </Card>
       </div>
-
-      {/* Subject Performance with Pie Charts */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Ders Bazlı Başarı Dağılımı</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {subjectsPieData.map((subject, index) => (
-              <div key={index} className="text-center">
-                <h4 className="font-medium mb-3">{subject.name}</h4>
-                <div className="w-32 h-32 mx-auto mb-3">
-                  <ResponsiveContainer width="100%" height="100%">
-                    <PieChart>
-                      <Pie
-                        data={subject.data}
-                        cx="50%"
-                        cy="50%"
-                        innerRadius={35}
-                        outerRadius={55}
-                        paddingAngle={3}
-                        dataKey="value"
-                      >
-                        {subject.data.map((entry, cellIndex) => (
-                          <Cell key={`cell-${cellIndex}`} fill={entry.color} />
-                        ))}
-                      </Pie>
-                      <Tooltip 
-                        formatter={(value) => [`%${value}`, 'Başarı']}
-                      />
-                    </PieChart>
-                  </ResponsiveContainer>
-                </div>
-                <div className="text-sm">
-                  <div className={`font-bold text-lg ${subject.data[0].value >= 70 ? 'text-green-600' : subject.data[0].value >= 50 ? 'text-yellow-600' : 'text-red-600'}`}>
-                    %{subject.data[0].value}
-                  </div>
-                  <div className="text-gray-500">Başarı Oranı</div>
-                </div>
-              </div>
-            ))}
-          </div>
-        </CardContent>
-      </Card>
 
       {/* Subject Analysis Tabs */}
       <Card>
@@ -785,40 +528,6 @@ const DetailedExamAnalysis = ({ examId }: DetailedExamAnalysisProps) => {
                           <Progress value={topicData.successRate} className="h-2" />
                         </div>
 
-                        {/* Topic Analysis Pie Chart */}
-                        <div className="mt-6">
-                          <h4 className="font-medium mb-3">Cevap Dağılımı</h4>
-                          <div className="h-64">
-                            <ResponsiveContainer width="100%" height="100%">
-                              <PieChart>
-                                <Pie
-                                  data={[
-                                    { name: 'Doğru', value: topicData.correctAnswers, fill: '#10b981' },
-                                    { name: 'Yanlış', value: topicData.wrongAnswers, fill: '#ef4444' },
-                                    { name: 'Boş', value: topicData.emptyAnswers, fill: '#6b7280' }
-                                  ]}
-                                  cx="50%"
-                                  cy="50%"
-                                  labelLine={false}
-                                  label={({ name, value, percent }) => `${name}: ${value} (${(percent * 100).toFixed(1)}%)`}
-                                  outerRadius={80}
-                                  fill="#8884d8"
-                                  dataKey="value"
-                                >
-                                  {[
-                                    { name: 'Doğru', value: topicData.correctAnswers, fill: '#10b981' },
-                                    { name: 'Yanlış', value: topicData.wrongAnswers, fill: '#ef4444' },
-                                    { name: 'Boş', value: topicData.emptyAnswers, fill: '#6b7280' }
-                                  ].map((entry, index) => (
-                                    <Cell key={`cell-${index}`} fill={entry.fill} />
-                                  ))}
-                                </Pie>
-                                <Tooltip />
-                              </PieChart>
-                            </ResponsiveContainer>
-                          </div>
-                        </div>
-
                         {/* Question Analysis Table */}
                         {topicData.questionAnalysis.length > 0 && (
                           <div className="mt-4">
@@ -847,51 +556,6 @@ const DetailedExamAnalysis = ({ examId }: DetailedExamAnalysisProps) => {
                                 ))}
                               </TableBody>
                             </Table>
-
-                            {/* Individual Question Pie Charts */}
-                            <div className="mt-6">
-                              <h4 className="font-medium mb-4">Soru Bazlı Cevap Dağılımları</h4>
-                              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                                {topicData.questionAnalysis.map((q: any) => (
-                                  <Card key={q.questionNumber} className="p-4">
-                                    <div className="text-center mb-2">
-                                      <h5 className="font-medium">Soru {q.questionNumber}</h5>
-                                      <p className="text-sm text-gray-500">Doğru Cevap: {q.correctAnswer}</p>
-                                      <p className="text-sm font-medium text-green-600">{q.successRate.toFixed(1)}% Başarı</p>
-                                    </div>
-                                    <div className="h-48">
-                                      <ResponsiveContainer width="100%" height="100%">
-                                        <PieChart>
-                                          <Pie
-                                            data={[
-                                              { name: 'Doğru', value: q.correctCount, fill: '#10b981' },
-                                              { name: 'Yanlış', value: q.wrongCount, fill: '#ef4444' },
-                                              { name: 'Boş', value: q.emptyCount, fill: '#6b7280' }
-                                            ]}
-                                            cx="50%"
-                                            cy="50%"
-                                            labelLine={false}
-                                            label={({ name, value, percent }) => `${name}: ${value}`}
-                                            outerRadius={60}
-                                            fill="#8884d8"
-                                            dataKey="value"
-                                          >
-                                            {[
-                                              { name: 'Doğru', value: q.correctCount, fill: '#10b981' },
-                                              { name: 'Yanlış', value: q.wrongCount, fill: '#ef4444' },
-                                              { name: 'Boş', value: q.emptyCount, fill: '#6b7280' }
-                                            ].map((entry, index) => (
-                                              <Cell key={`cell-${q.questionNumber}-${index}`} fill={entry.fill} />
-                                            ))}
-                                          </Pie>
-                                          <Tooltip />
-                                        </PieChart>
-                                      </ResponsiveContainer>
-                                    </div>
-                                  </Card>
-                                ))}
-                              </div>
-                            </div>
                           </div>
                         )}
                       </CardContent>

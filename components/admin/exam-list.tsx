@@ -5,7 +5,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { useExamStore } from "@/lib/stores/exam-store"
-import { Calendar, Users, FileText, Upload, Eye, Trash2 } from "lucide-react"
+import { Calendar, Users, FileText, Upload, Eye, Trash2, User, School } from "lucide-react"
+import { useRouter } from "next/navigation"
 import BookletUpload from "./booklet-upload"
 import OptikResultsViewer from "./optik-results-viewer"
 import DetailedExamAnalysis from "./detailed-exam-analysis"
@@ -13,6 +14,7 @@ import DetailedExamAnalysis from "./detailed-exam-analysis"
 export default function ExamList() {
   const [selectedExam, setSelectedExam] = useState<string | null>(null)
   const [showResults, setShowResults] = useState<string | null>(null)
+  const router = useRouter()
   const [loading, setLoading] = useState(true)
   const { exams, getBookletByExamId, getResultsByExamId, fetchExams, createExamAPI, deleteExamAPI } = useExamStore()
 
@@ -146,15 +148,31 @@ export default function ExamList() {
                     </Button>
 
                     {results.length > 0 && (
-                      <Button 
-                        variant="outline" 
-                        size="lg" 
-                        className="flex items-center gap-2 bg-transparent"
-                        onClick={() => setShowResults(exam.id)}
-                      >
-                        <Eye className="h-5 w-5" />
-                        Sonuçları Gör
-                      </Button>
+                      <div className="flex gap-2">
+                        <Button 
+                          variant="outline" 
+                          size="lg" 
+                          className="flex items-center gap-2 bg-transparent"
+                          onClick={() => setShowResults(exam.id)}
+                        >
+                          <School className="h-5 w-5" />
+                          Genel Okul Bazlı
+                        </Button>
+                        
+                        <Button 
+                          variant="outline" 
+                          size="lg" 
+                          className="flex items-center gap-2 bg-transparent border-green-500 text-green-700 hover:bg-green-50"
+                          onClick={() => {
+                            // Store'da examId'yi set et ve student-analysis sayfasına yönlendir
+                            // Önce exam store'a selectedExam'i set edelim
+                            router.push(`/student-analysis?examId=${exam.id}`)
+                          }}
+                        >
+                          <User className="h-5 w-5" />
+                          Öğrenci Bazlı
+                        </Button>
+                      </div>
                     )}
 
                     <Button 
@@ -292,7 +310,7 @@ export default function ExamList() {
               </Button>
             </div>
             <div className="overflow-auto max-h-[80vh]">
-              <DetailedExamAnalysis examId={showResults} hideClassFilter={true} />
+              <DetailedExamAnalysis examId={showResults} />
             </div>
           </div>
         </div>

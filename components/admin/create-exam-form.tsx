@@ -24,6 +24,7 @@ interface ExamFormData {
   date: string
   classLevels: string
   examTypeId: string
+  optikFormId: string
   code: string
   duration: number
   subjects: any[]
@@ -47,6 +48,7 @@ export default function CreateExamForm() {
   const [selectedSubjects, setSelectedSubjects] = useState<string[]>([])
   const [examTypes, setExamTypes] = useState<ExamType[]>([])
   const [selectedExamType, setSelectedExamType] = useState<ExamType | null>(null)
+  const [optikForms, setOptikForms] = useState<any[]>([])
   const [success, setSuccess] = useState(false)
   const [loading, setLoading] = useState(false)
   const { addExam, createExamAPI } = useExamStore()
@@ -71,6 +73,21 @@ export default function CreateExamForm() {
       }
     }
     loadExamTypes()
+  }, [])
+
+  // Optik formları yükle
+  useEffect(() => {
+    const loadOptikForms = async () => {
+      try {
+        const forms = await apiClient.getOptikForms()
+        console.log('Optik forms loaded:', forms)
+        setOptikForms(Array.isArray(forms) ? forms : [])
+      } catch (error) {
+        console.error('Optik formlar yüklenemedi:', error)
+        setOptikForms([])
+      }
+    }
+    loadOptikForms()
   }, [])
 
   // Sınav tipi seçildiğinde dersleri otomatik olarak ayarla
@@ -136,6 +153,12 @@ export default function CreateExamForm() {
       return
     }
 
+    // Optik form ID validation
+    if (!data.optikFormId) {
+      alert('Lütfen optik formu seçin')
+      return
+    }
+
     setLoading(true)
     try {
       console.log('Form data being sent:', data) // Debug log
@@ -146,6 +169,7 @@ export default function CreateExamForm() {
         date: data.date,
         classLevels: data.classLevels, // Backend'de classLevels bekleniyor
         examTypeId: data.examTypeId,
+        optikFormId: data.optikFormId, // Optik form ID'si eklendi
         code: data.code,
         duration: data.duration,
         subjects: data.subjects,
@@ -282,7 +306,36 @@ export default function CreateExamForm() {
               {errors.examTypeId && <p className="text-sm text-red-600">{errors.examTypeId.message}</p>}
             </div>
 
-
+            <div className="space-y-2">
+              <Label htmlFor="optikFormId">Optik Form *</Label>
+              <Select onValueChange={(value) => setValue("optikFormId", value)}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Optik formu seçin" />
+                </SelectTrigger>
+                <SelectContent>
+                  {optikForms.map((form) => (
+                    <SelectItem key={form._id || form.id} value={form._id || form.id}>
+                      <div className="flex flex-col">
+                        <span>{form.name}</span>
+                        <span className="text-xs text-gray-500">
+                          {form.totalQuestions} soru • {form.subjects?.length || 0} ders
+                        </span>
+                      </div>
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              {optikForms.length === 0 && (
+                <p className="text-sm text-orange-600">
+                  Optik form bulunamadı. Önce optik form oluşturun.
+                </p>
+              )}
+              <p className="text-xs text-gray-500">
+                Toplam {optikForms.length} optik form
+              </p>
+              <input type="hidden" {...register("optikFormId", { required: "Optik form seçimi gereklidir" })} />
+              {errors.optikFormId && <p className="text-sm text-red-600">{errors.optikFormId.message}</p>}
+            </div>
           </div>
 
           <div className="space-y-4">

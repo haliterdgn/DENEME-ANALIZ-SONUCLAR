@@ -167,6 +167,35 @@ export default function AdminDashboard() {
         </div>
       </div>
 
+      {/* System Status */}
+      <Card className="border-green-200 bg-gradient-to-r from-green-50 to-blue-50">
+        <CardContent className="p-6">
+          <div className="flex items-center gap-3 mb-4">
+            <div className="w-3 h-3 bg-green-500 rounded-full animate-pulse"></div>
+            <h3 className="text-lg font-semibold text-green-800">Sistem Durumu: Aktif</h3>
+            <Badge className="bg-green-100 text-green-800">Çevrimiçi</Badge>
+          </div>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
+            <div className="flex items-center gap-2">
+              <CheckCircle className="h-4 w-4 text-green-600" />
+              <span>API Bağlantısı</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <CheckCircle className="h-4 w-4 text-green-600" />
+              <span>Veritabanı</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <CheckCircle className="h-4 w-4 text-green-600" />
+              <span>Dosya Sistemi</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <CheckCircle className="h-4 w-4 text-green-600" />
+              <span>Analiz Motoru</span>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
       {/* Quick Stats */}
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-6">
         <Card className="bg-gradient-to-br from-blue-500 to-blue-600 text-white">
