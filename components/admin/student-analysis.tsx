@@ -242,43 +242,58 @@ const StudentAnalysis = ({ examId, studentId }: StudentAnalysisProps) => {
       const pageWidth = pdf.internal.pageSize.width
       let currentY = 20
 
+      // Helper function to handle Turkish characters for this PDF
+      const cleanTextForPDF = (text) => {
+        if (!text) return ''
+        const turkishChars = {
+          'ç': 'c', 'Ç': 'C', 'ğ': 'g', 'Ğ': 'G', 'ı': 'i', 'İ': 'I',
+          'ö': 'o', 'Ö': 'O', 'ş': 's', 'Ş': 'S', 'ü': 'u', 'Ü': 'U'
+        }
+        let cleanedText = text.toString()
+        Object.keys(turkishChars).forEach(turkishChar => {
+          const regex = new RegExp(turkishChar, 'g')
+          cleanedText = cleanedText.replace(regex, turkishChars[turkishChar])
+        })
+        return cleanedText.replace(/[^\x20-\x7E]/g, '')
+      }
+
       // Title
       pdf.setFontSize(16)
       pdf.setFont(undefined, 'bold')
-      pdf.text('Öğrenci Bazlı Analiz Raporu', 20, currentY)
+      pdf.text(cleanTextForPDF('Öğrenci Bazlı Analiz Raporu'), 20, currentY)
       currentY += 10
 
       // Student Info
       pdf.setFontSize(12)
       pdf.setFont(undefined, 'normal')
-      pdf.text(`Öğrenci: ${analysisData.studentInfo.ogrenciAdi}`, 20, currentY)
+      pdf.text(cleanTextForPDF(`Ogrenci: ${analysisData.studentInfo.ogrenciAdi}`), 20, currentY)
       currentY += 7
-      pdf.text(`Öğrenci No: ${analysisData.studentInfo.ogrenciNo}`, 20, currentY)
+      pdf.text(cleanTextForPDF(`Ogrenci No: ${analysisData.studentInfo.ogrenciNo}`), 20, currentY)
       currentY += 7
-      pdf.text(`Sınıf: ${analysisData.studentInfo.sinif}/${analysisData.studentInfo.sube}`, 20, currentY)
+      pdf.text(cleanTextForPDF(`Sinif: ${analysisData.studentInfo.sinif}/${analysisData.studentInfo.sube}`), 20, currentY)
       currentY += 7
-      pdf.text(`Sınav: ${analysisData.examInfo.examName}`, 20, currentY)
+      pdf.text(cleanTextForPDF(`Sinav: ${analysisData.examInfo.examName}`), 20, currentY)
       currentY += 15
 
       // Overall Performance
       pdf.setFont(undefined, 'bold')
-      pdf.text('Genel Performans', 20, currentY)
+      pdf.text(cleanTextForPDF('Genel Performans'), 20, currentY)
       currentY += 10
       pdf.setFont(undefined, 'normal')
-      pdf.text(`Toplam Puan: ${analysisData.studentPerformance.totalScore}`, 20, currentY)
+      pdf.text(cleanTextForPDF(`Toplam Puan: ${analysisData.studentPerformance.totalScore}`), 20, currentY)
       currentY += 7
-      pdf.text(`Doğru: ${analysisData.studentPerformance.totalCorrect}`, 20, currentY)
+      pdf.text(cleanTextForPDF(`Dogru: ${analysisData.studentPerformance.totalCorrect}`), 20, currentY)
       currentY += 7
-      pdf.text(`Yanlış: ${analysisData.studentPerformance.totalWrong}`, 20, currentY)
+      pdf.text(cleanTextForPDF(`Yanlis: ${analysisData.studentPerformance.totalWrong}`), 20, currentY)
       currentY += 7
-      pdf.text(`Boş: ${analysisData.studentPerformance.totalEmpty}`, 20, currentY)
+      pdf.text(cleanTextForPDF(`Bos: ${analysisData.studentPerformance.totalEmpty}`), 20, currentY)
       currentY += 7
-      pdf.text(`Sınıf Sıralaması: ${analysisData.classComparison.studentRank}/${analysisData.classComparison.totalStudents}`, 20, currentY)
+      pdf.text(cleanTextForPDF(`Sinif Siralamasi: ${analysisData.classComparison.studentRank}/${analysisData.classComparison.totalStudents}`), 20, currentY)
       currentY += 15
 
       // Subject Performance
       pdf.setFont(undefined, 'bold')
-      pdf.text('Ders Bazlı Performans', 20, currentY)
+      pdf.text(cleanTextForPDF('Ders Bazli Performans'), 20, currentY)
       currentY += 10
 
       analysisData.studentPerformance.subjectScores.forEach((subject) => {
@@ -288,17 +303,18 @@ const StudentAnalysis = ({ examId, studentId }: StudentAnalysisProps) => {
         }
         
         pdf.setFont(undefined, 'bold')
-        pdf.text(subject.subjectName, 20, currentY)
+        pdf.text(cleanTextForPDF(subject.subjectName), 20, currentY)
         currentY += 7
         pdf.setFont(undefined, 'normal')
-        pdf.text(`Doğru: ${subject.correct} | Yanlış: ${subject.wrong} | Boş: ${subject.empty} | Puan: ${subject.score}`, 25, currentY)
+        pdf.text(cleanTextForPDF(`Dogru: ${subject.correct} | Yanlis: ${subject.wrong} | Bos: ${subject.empty} | Puan: ${subject.score}`), 25, currentY)
         currentY += 10
       })
 
       // Save PDF
+      const cleanStudentName = cleanTextForPDF(analysisData.studentInfo.ogrenciAdi).replace(/[^a-zA-Z0-9]/g, '_')
       const fileName = includeFiltered ? 
-        `${analysisData.studentInfo.ogrenciAdi}_Analiz_Filtreli.pdf` :
-        `${analysisData.studentInfo.ogrenciAdi}_Analiz.pdf`
+        `${cleanStudentName}_Analiz_Filtreli.pdf` :
+        `${cleanStudentName}_Analiz.pdf`
       
       pdf.save(fileName)
       
@@ -337,7 +353,13 @@ const StudentAnalysis = ({ examId, studentId }: StudentAnalysisProps) => {
 
       pdf.addImage(imgData, 'PNG', imgX, imgY, imgWidth * ratio, imgHeight * ratio)
       
-      const fileName = `${analysisData.studentInfo.ogrenciAdi}_Detayli_Analiz.pdf`
+      // Clean Turkish characters for filename
+      const cleanName = analysisData.studentInfo.ogrenciAdi.replace(/[çÇğĞıİöÖşŞüÜ]/g, (char) => {
+        const turkishChars = { 'ç': 'c', 'Ç': 'C', 'ğ': 'g', 'Ğ': 'G', 'ı': 'i', 'İ': 'I', 'ö': 'o', 'Ö': 'O', 'ş': 's', 'Ş': 'S', 'ü': 'u', 'Ü': 'U' }
+        return turkishChars[char] || char
+      }).replace(/[^a-zA-Z0-9]/g, '_')
+      
+      const fileName = `${cleanName}_Detayli_Analiz.pdf`
       pdf.save(fileName)
       
     } catch (error) {
@@ -475,10 +497,31 @@ const StudentAnalysis = ({ examId, studentId }: StudentAnalysisProps) => {
       // Get exam info
       const examInfo = allResults[0]?.examInfo || { examName: 'Sınav', optikFormName: 'Form' }
       
-      // Helper function to clean Turkish characters for display
+      // Helper function to handle Turkish characters for PDF display
       const cleanText = (text) => {
         if (!text) return ''
-        return text.toString().replace(/[^\x20-\x7E\u00C0-\u017F]/g, '?').substring(0, 25)
+        // Türkçe karakter dönüşüm tablosu
+        const turkishChars = {
+          'ç': 'c', 'Ç': 'C',
+          'ğ': 'g', 'Ğ': 'G', 
+          'ı': 'i', 'İ': 'I',
+          'ö': 'o', 'Ö': 'O',
+          'ş': 's', 'Ş': 'S',
+          'ü': 'u', 'Ü': 'U'
+        }
+        
+        let cleanedText = text.toString()
+        
+        // Türkçe karakterleri ASCII karşılıklarıyla değiştir
+        Object.keys(turkishChars).forEach(turkishChar => {
+          const regex = new RegExp(turkishChar, 'g')
+          cleanedText = cleanedText.replace(regex, turkishChars[turkishChar])
+        })
+        
+        // Sadece ASCII karakterleri ve bazı özel karakterleri tut
+        cleanedText = cleanedText.replace(/[^\x20-\x7E]/g, '')
+        
+        return cleanedText.substring(0, 25)
       }
       
       // Helper function to add page header
@@ -494,7 +537,7 @@ const StudentAnalysis = ({ examId, studentId }: StudentAnalysisProps) => {
         
         pdf.setFontSize(10)
         pdf.setFont(undefined, 'normal')
-        pdf.text(`${cleanText(examInfo.examName)} - ${cleanText(examInfo.optikFormName)}`, pageWidth / 2, currentY, { align: 'center' })
+        pdf.text(`${examInfo.examName || 'Sinav'} - ${examInfo.optikFormName || 'Form'}`, pageWidth / 2, currentY, { align: 'center' })
         currentY += 15
         
         drawTableHeader()
@@ -543,9 +586,9 @@ const StudentAnalysis = ({ examId, studentId }: StudentAnalysisProps) => {
       // Exam details
       pdf.setFontSize(12)
       pdf.setFont(undefined, 'normal')
-      pdf.text(`Sinav: ${cleanText(examInfo.examName)}`, pageWidth / 2, currentY, { align: 'center' })
+      pdf.text(`Sinav: ${examInfo.examName || 'Bilinmeyen Sinav'}`, pageWidth / 2, currentY, { align: 'center' })
       currentY += 6
-      pdf.text(`Optik Form: ${cleanText(examInfo.optikFormName)}`, pageWidth / 2, currentY, { align: 'center' })
+      pdf.text(`Optik Form: ${examInfo.optikFormName || 'Bilinmeyen Form'}`, pageWidth / 2, currentY, { align: 'center' })
       currentY += 6
       pdf.text(`Toplam Ogrenci: ${studentsWithPerformance.length}`, pageWidth / 2, currentY, { align: 'center' })
       currentY += 6
@@ -553,7 +596,9 @@ const StudentAnalysis = ({ examId, studentId }: StudentAnalysisProps) => {
       if (!hasAnswerKey) {
         pdf.setFontSize(10)
         pdf.setTextColor(200, 0, 0)
-        pdf.text('UYARI: Bu sinav icin cevap anahtari tanimlanmamis. Sadece cevaplanmis/bos istatistigi gosterilmektedir.', pageWidth / 2, currentY, { align: 'center' })
+        pdf.text('UYARI: Bu sinav icin cevap anahtari tanimlanmamis.', pageWidth / 2, currentY, { align: 'center' })
+        currentY += 4
+        pdf.text('Sadece cevaplanmis/bos istatistigi gosterilmektedir.', pageWidth / 2, currentY, { align: 'center' })
         pdf.setTextColor(0, 0, 0)
         currentY += 6
         pdf.setFontSize(12)
@@ -684,8 +729,8 @@ const StudentAnalysis = ({ examId, studentId }: StudentAnalysisProps) => {
       // Footer
       pdf.setFontSize(8)
       pdf.setTextColor(100, 100, 100)
-      pdf.text(`Bu rapor ${new Date().toLocaleDateString('tr-TR')} ${new Date().toLocaleTimeString('tr-TR')} tarihinde olusturulmustur.`, 
-        pageWidth / 2, pageHeight - 15, { align: 'center' })
+      const footerText = `Bu rapor ${new Date().toLocaleDateString('tr-TR')} ${new Date().toLocaleTimeString('tr-TR')} tarihinde olusturulmustur.`
+      pdf.text(cleanText(footerText), pageWidth / 2, pageHeight - 15, { align: 'center' })
       
       // Save PDF
       const cleanExamName = cleanText(examInfo.examName).replace(/[^a-zA-Z0-9]/g, '_')
