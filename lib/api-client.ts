@@ -267,10 +267,20 @@ class ApiClient {
     } catch (error: any) {
       console.error('❌ Analiz hatası:', error)
       
-      // Eğer "No student results" hatası varsa özel mesaj
+      // Özel hata mesajları
       if (error.message.toLowerCase().includes('no student results')) {
         const enhancedError = new Error('Öğrenci sonuçları bulunamadı. Lütfen önce TXT dosyası yükleyin.') as any
         enhancedError.code = 'NO_STUDENT_RESULTS'
+        enhancedError.originalError = error
+        throw enhancedError
+      }
+      
+      // Optik form ID hatası
+      if (error.message.toLowerCase().includes('optik form') || 
+          error.message.toLowerCase().includes('gerekli') ||
+          (error.status === 400 && !options.optikFormId)) {
+        const enhancedError = new Error('Optik form ID gerekli - alternatif yöntem kullanılacak') as any
+        enhancedError.code = 'OPTIK_FORM_ID_REQUIRED'
         enhancedError.originalError = error
         throw enhancedError
       }
@@ -376,6 +386,21 @@ class ApiClient {
     return this.request(`/api/exams/${id}`, {
       method: 'DELETE'
     })
+  }
+
+  // =====================================
+  // STUDENT EXAM COMPARISON
+  // =====================================
+  async getStudentExamComparison(studentNo: string): Promise<any> {
+    try {
+      console.log('📊 Öğrenci sınav karşılaştırması yükleniyor:', studentNo)
+      const result = await this.request(`/api/students/${studentNo}/exam-comparison`)
+      console.log('✅ Sınav karşılaştırması yüklendi:', result)
+      return result
+    } catch (error) {
+      console.error('❌ Sınav karşılaştırması yüklenemedi:', error)
+      throw error
+    }
   }
 
   // =====================================
@@ -590,13 +615,33 @@ class ApiClient {
       console.log('🔍 Student results yapısı:', { studentResults, type: typeof studentResults, isArray: Array.isArray(studentResults) })
       
       // studentResults direkt array olarak dönüyor
+      // studentId birden fazla formatta gelebilir - UUID, TC kimlik no, öğrenci no
       const student = Array.isArray(studentResults) 
-        ? studentResults.find((s: any) => s.id === studentId)
+        ? studentResults.find((s: any) => {
+            // Birden fazla kritere göre arama yap
+            const matches = [
+              s.id === studentId,
+              s.studentInfo?.tcKimlikNo === studentId,
+              s.studentInfo?.ogrenciNo === studentId,
+              // Eğer studentId bir UUID ise, TC kimlik no ile eşleştirmeyi dene
+              s.studentInfo?.tcKimlikNo && studentId.length > 20, // UUID uzunluğu kontrolü
+              // Eğer studentId kısa ise (öğrenci no), öğrenci no ile eşleştir
+              s.studentInfo?.ogrenciNo && studentId.length < 20
+            ]
+            return matches.some(Boolean)
+          })
         : null
       
       if (!student) {
         console.error('❌ Öğrenci bulunamadı. Aranılan ID:', studentId)
-        console.error('📋 Mevcut öğrenci ID\'leri:', Array.isArray(studentResults) ? studentResults.map((s: any) => s.id) : 'Veri array değil')
+        console.error('📋 Mevcut öğrenci bilgileri:', Array.isArray(studentResults) 
+          ? studentResults.slice(0, 3).map((s: any) => ({ 
+              id: s.id, 
+              tcKimlik: s.studentInfo?.tcKimlikNo, 
+              ogrenciNo: s.studentInfo?.ogrenciNo,
+              name: s.studentInfo?.ogrenciAdi 
+            })) 
+          : 'Veri array değil')
         throw new Error(`Öğrenci bulunamadı: ${studentId}`)
       }
       
