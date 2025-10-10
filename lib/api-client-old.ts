@@ -1,4 +1,4 @@
-const API_BASE_URL = 'http://172.28.107.97:3001'
+const API_BASE_URL = 'http://34.236.53.26'
 
 class ApiClient {
   private baseUrl: string
