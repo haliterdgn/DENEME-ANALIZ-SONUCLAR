@@ -184,10 +184,9 @@ const ComprehensiveResults = ({ examId, studentId }: ComprehensiveResultsProps) 
   // Filtering states
   const [searchTerm, setSearchTerm] = useState<string>('')
   const [selectedClass, setSelectedClass] = useState<string>('all')
-  const [selectedExamId, setSelectedExamId] = useState<string>(examId || selectedExam?.id || '')
 
-  // Get active exam ID (either from state or props or store)
-  const activeExamId = selectedExamId || examId || selectedExam?.id
+  // Get active exam ID (either from props or store)
+  const activeExamId = examId || selectedExam?.id
 
   // Filtering logic
   const filteredStudents = students.filter(student => {
@@ -283,32 +282,57 @@ const ComprehensiveResults = ({ examId, studentId }: ComprehensiveResultsProps) 
       let analysisResult = null
       
       try {
-        // Check if we have a valid optikFormId before calling analyzeResults
-        if (!optikFormId) {
-          throw new Error('Optik form ID bulunamadı - fallback kullanılacak')
-        }
-        
-        // Use the fixed analyzeResults API that includes classRank and classPercentile
-        console.log('🔄 Calling analyzeResults with optikFormId:', optikFormId)
-        analysisResult = await apiClient.analyzeResults(activeExamId, { optikFormId })
-        console.log('� Analysis results loaded with rankings:', analysisResult?.studentResults?.length, 'students')
-        
-        if (!analysisResult || !analysisResult.studentResults || !Array.isArray(analysisResult.studentResults)) {
-          throw new Error('Invalid analysis results format')
-        }
-        
-        console.log('✅ Successfully loaded analysis results from backend with complete ranking data')
+        // Geçici olarak analyzeResults yerine direkt getStudentResults kullan
+        console.log('🔄 Loading student results directly (comprehensive results mode)')
+        throw new Error('Using direct student results for comprehensive view')
       } catch (error) {
-        console.error('❌ Error with analyzeResults API, falling back to getStudentResults:', error.message || error)
-        console.log('ℹ️ Bu normal bir durum - optik form ID bulunamadığında fallback sistemi devreye girer')
+        console.log('ℹ️ Using direct student results approach for comprehensive results')
         
-        // Fallback to getStudentResults if analyzeResults still has issues
-        const studentResults = await apiClient.getStudentResults(activeExamId)
-        console.log('📊 Student results loaded (fallback):', studentResults?.length, 'students')
+        // Use getStudentResults directly for comprehensive results
+        const studentResultsResponse = await apiClient.getStudentResults(activeExamId)
+        console.log('📊 Student results response:', studentResultsResponse)
+        
+        // Handle both array format and paginated format
+        let studentResults = []
+        if (Array.isArray(studentResultsResponse)) {
+          studentResults = studentResultsResponse
+        } else if (studentResultsResponse?.results && Array.isArray(studentResultsResponse.results)) {
+          studentResults = studentResultsResponse.results
+        }
+        
+        console.log('📊 Student results loaded:', studentResults?.length, 'students')
         
         if (studentResults && Array.isArray(studentResults)) {
+          // Remove any remaining duplicates before processing
+          const uniqueStudentResults = studentResults.filter((student: any, index: number, array: any[]) => {
+            const currentId = student.studentInfo?.tcKimlikNo || student.studentInfo?.ogrenciNo
+            const currentName = student.studentInfo?.ogrenciAdi?.trim()
+            const currentClass = student.studentInfo?.sinif || student.studentInfo?.class || ''
+            const currentSection = student.studentInfo?.sube || student.studentInfo?.section || ''
+            
+            // Create a unique key combining ID, name, class and section
+            const currentKey = `${currentId}-${currentName}-${currentClass}-${currentSection}`
+            
+            // Find first occurrence of this unique combination
+            const firstIndex = array.findIndex((s: any) => {
+              const id = s.studentInfo?.tcKimlikNo || s.studentInfo?.ogrenciNo
+              const name = s.studentInfo?.ogrenciAdi?.trim()
+              const cls = s.studentInfo?.sinif || s.studentInfo?.class || ''
+              const section = s.studentInfo?.sube || s.studentInfo?.section || ''
+              const key = `${id}-${name}-${cls}-${section}`
+              return key === currentKey
+            })
+            
+            return index === firstIndex // Keep only first occurrence
+          })
+          
+          const duplicatesRemoved = studentResults.length - uniqueStudentResults.length
+          if (duplicatesRemoved > 0) {
+            console.log(`🧹 Removed ${duplicatesRemoved} duplicate students before processing`)
+          }
+          
           // Calculate scores and rankings for each student (fallback method)
-          const studentsWithScores = studentResults.map((student: any, index: number) => {
+          const studentsWithScores = uniqueStudentResults.map((student: any, index: number) => {
             // Calculate basic performance
             let totalCorrect = 0
             let totalWrong = 0
@@ -444,8 +468,10 @@ const ComprehensiveResults = ({ examId, studentId }: ComprehensiveResultsProps) 
       }
       
       if (analysisResult && analysisResult.studentResults && Array.isArray(analysisResult.studentResults)) {
-        const studentList = analysisResult.studentResults.map((result: any, index: number) => ({
-          id: result.studentInfo?.tcKimlikNo || result.studentInfo?.ogrenciNo || `student-${index}-${Date.now()}`,
+        console.log(`📊 Processing ${analysisResult.studentResults.length} students from API (duplicates already filtered)`)
+        
+        const studentList = analysisResult.studentResults.map((result: any) => ({
+          id: result.studentInfo?.tcKimlikNo || result.studentInfo?.ogrenciNo || Math.random().toString(),
           name: result.studentInfo?.ogrenciAdi || 'Bilinmeyen Öğrenci',
           studentNo: result.studentInfo?.ogrenciNo || '',
           class: result.studentInfo?.sinif || result.studentInfo?.class || '',
@@ -574,25 +600,9 @@ const ComprehensiveResults = ({ examId, studentId }: ComprehensiveResultsProps) 
         for (const idToTry of idsToTry) {
           try {
             console.log(`🔄 Trying getStudentAnalysis with ID: ${idToTry}`)
-            console.log(`🎯 Expected student name: ${selectedStudentData?.name}`)
             detailedAnalysis = await apiClient.getStudentAnalysis(activeExamId, idToTry)
             if (detailedAnalysis && detailedAnalysis.studentPerformance) {
               console.log(`✅ Success with ID: ${idToTry}`)
-              console.log(`👤 Returned student name: ${detailedAnalysis.studentPerformance.studentInfo?.ogrenciAdi}`)
-              
-              // Check if returned student matches expected student
-              if (detailedAnalysis.studentPerformance.studentInfo?.ogrenciAdi !== selectedStudentData?.name) {
-                console.warn(`⚠️ STUDENT MISMATCH! Expected: ${selectedStudentData?.name}, Got: ${detailedAnalysis.studentPerformance.studentInfo?.ogrenciAdi}`)
-                console.warn(`🔍 This indicates a backend bug - API returning wrong student data`)
-                
-                // WORKAROUND: Override returned student info with selected student data
-                console.log(`🔧 Applying frontend workaround - using selected student data`)
-                detailedAnalysis.studentPerformance.studentInfo.ogrenciAdi = selectedStudentData.name
-                detailedAnalysis.studentPerformance.studentInfo.ogrenciNo = selectedStudentData.studentNo
-                detailedAnalysis.studentPerformance.studentInfo.tcKimlikNo = selectedStudentData.id
-                detailedAnalysis.studentPerformance.studentInfo.sinif = selectedStudentData.class
-                detailedAnalysis.studentPerformance.studentInfo.sube = selectedStudentData.section
-              }
               break
             }
           } catch (idError) {
@@ -1455,122 +1465,30 @@ const ComprehensiveResults = ({ examId, studentId }: ComprehensiveResultsProps) 
 
   if (!activeExamId) {
     return (
-      <div className="space-y-6">
-        {/* Exam Selection Header */}
-        <Card className="bg-gradient-to-r from-blue-50 to-indigo-50 border-blue-200">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-3 text-2xl text-blue-800">
-              <Target className="h-7 w-7" />
-              Kapsamlı Sonuçlar - Sınav Bazlı Analiz
-            </CardTitle>
-            <p className="text-blue-600 mt-2">
-              Sınıf ve öğrenci bazında detaylı performans analizi için bir sınav seçin
-            </p>
-          </CardHeader>
-        </Card>
-
-        {/* Exam Selection */}
-        <Card className="p-8">
-          <div className="text-center mb-8">
-            <div className="bg-blue-100 w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-4">
-              <FileText className="h-10 w-10 text-blue-600" />
-            </div>
-            <h2 className="text-2xl font-bold text-gray-900 mb-2">Sınav Seçin</h2>
-            <p className="text-gray-600">Analiz yapmak istediğiniz sınavı seçerek başlayın</p>
-          </div>
-
-          {exams && exams.length > 0 ? (
-            <div className="max-w-2xl mx-auto">
-              <label className="block text-sm font-medium text-gray-700 mb-3">
-                Mevcut Sınavlar
-              </label>
-              <Select value={selectedExamId} onValueChange={setSelectedExamId}>
-                <SelectTrigger className="h-12 text-left">
-                  <SelectValue placeholder="Sınav seçin..." />
-                </SelectTrigger>
-                <SelectContent>
-                  {exams.map(exam => (
-                    <SelectItem key={exam.id} value={exam.id} className="py-3">
-                      <div className="flex flex-col items-start">
-                        <div className="font-medium">{exam.name}</div>
-                        <div className="text-sm text-gray-500">
-                          {new Date(exam.createdAt).toLocaleDateString('tr-TR')} • 
-                          {exam.status === 'active' ? ' Aktif' : exam.status === 'completed' ? ' Tamamlandı' : ' Beklemede'}
-                        </div>
-                      </div>
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              
-              {selectedExamId && (
-                <div className="mt-6 text-center">
-                  <Button 
-                    onClick={() => setSelectedExamId(selectedExamId)}
-                    className="bg-blue-600 hover:bg-blue-700 px-8 py-3 text-lg"
-                  >
-                    <Award className="h-5 w-5 mr-2" />
-                    Analize Başla
-                  </Button>
-                </div>
-              )}
-            </div>
-          ) : (
-            <div className="text-center text-gray-500">
-              <AlertCircle className="h-12 w-12 mx-auto mb-4 text-gray-400" />
-              <p className="text-lg">Henüz sınav bulunmuyor</p>
-              <p className="text-sm">Önce bir sınav oluşturmanız gerekiyor</p>
-            </div>
-          )}
-        </Card>
-      </div>
+      <Card className="p-6">
+        <div className="text-center text-gray-500">
+          <FileText className="h-8 w-8 mx-auto mb-2" />
+          <p>Analiz için sınav seçin</p>
+        </div>
+      </Card>
     )
   }
 
   return (
     <div className="space-y-6">
-      {/* Header with Exam Selection */}
-      <Card className="bg-gradient-to-r from-blue-50 to-indigo-50 border-blue-200">
+      {/* Header and Student Selection */}
+      <Card>
         <CardHeader>
           <div className="flex items-center justify-between">
-            <div className="flex-1">
-              <CardTitle className="flex items-center gap-3 text-2xl text-blue-800 mb-3">
-                <Target className="h-7 w-7" />
+            <div>
+              <CardTitle className="flex items-center gap-2">
+                <Target className="h-5 w-5" />
                 Kapsamlı Sonuçlar
               </CardTitle>
-              
-              {/* Exam Selector */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 items-center">
-                <div>
-                  <label className="block text-sm font-medium text-blue-700 mb-2">
-                    Aktif Sınav
-                  </label>
-                  <Select value={activeExamId} onValueChange={setSelectedExamId}>
-                    <SelectTrigger className="h-11 bg-white border-blue-200">
-                      <SelectValue placeholder="Sınav seçin..." />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {exams?.map(exam => (
-                        <SelectItem key={exam.id} value={exam.id} className="py-3">
-                          <div className="flex flex-col items-start">
-                            <div className="font-medium">{exam.name}</div>
-                            <div className="text-xs text-gray-500">
-                              {new Date(exam.createdAt).toLocaleDateString('tr-TR')}
-                            </div>
-                          </div>
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-                
-                {analysisData && (
-                  <div className="bg-white/70 p-3 rounded-lg border border-blue-200">
-                    <div className="text-sm text-blue-700">
-                      <p><strong>Form:</strong> {analysisData.examInfo.optikFormName}</p>
-                      <p><strong>Öğrenci:</strong> {students.length} kişi</p>
-                    </div>
-                  </div>
+              <div className="text-sm text-gray-600 mt-2">
+                <p>Sınıf ve öğrenci bazında detaylı performans analizi</p>
+                {activeExamId && exams?.find(e => e.id === activeExamId) && (
+                  <p><strong>Seçili Sınav:</strong> {exams?.find(e => e.id === activeExamId)?.name}</p>
                 )}
               </div>
             </div>
@@ -1622,123 +1540,72 @@ const ComprehensiveResults = ({ examId, studentId }: ComprehensiveResultsProps) 
         </CardHeader>
         <CardContent>
           <div className="space-y-4">
-            {/* Class/Section Selection First */}
-            <div className="bg-blue-50 p-4 rounded-lg border border-blue-200 mb-6">
-              <h3 className="text-lg font-semibold text-blue-800 mb-3 flex items-center gap-2">
-                <Users className="h-5 w-5" />
-                1. Adım: Sınıf/Şube Seçimi
-              </h3>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium mb-2 flex items-center gap-2">
-                    <Filter className="h-4 w-4" />
-                    Sınıf/Şube Seçin
-                  </label>
-                  <Select value={selectedClass} onValueChange={setSelectedClass}>
-                    <SelectTrigger className="bg-white">
-                      <SelectValue placeholder="Sınıf/Şube seçin..." />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="all">Tüm Sınıflar</SelectItem>
-                      {availableClasses.map(cls => (
-                        <SelectItem key={cls} value={cls}>
-                          {cls} ({filteredStudents.filter(s => `${s.class}/${s.section}` === cls).length} öğrenci)
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-                
-                <div>
-                  <label className="block text-sm font-medium mb-2 flex items-center gap-2">
-                    <Search className="h-4 w-4" />
-                    Öğrenci Ara (İsteğe Bağlı)
-                  </label>
-                  <Input
-                    type="text"
-                    placeholder="Öğrenci adı veya numarası..."
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                    className="bg-white"
-                  />
-                </div>
-              </div>
-            </div>
-
-            {/* Student List - Only show if class is selected */}
-            {selectedClass && selectedClass !== 'all' && (
-              <div className="bg-green-50 p-4 rounded-lg border border-green-200">
-                <h3 className="text-lg font-semibold text-green-800 mb-3 flex items-center gap-2">
-                  <BookOpen className="h-5 w-5" />
-                  2. Adım: Öğrenci Listesi ({selectedClass})
-                </h3>
-                <div className="max-h-96 overflow-y-auto">
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
-                    {filteredStudents.filter(student => student.id && student.id.trim() !== '').map((student, index) => (
-                      <Card key={`card-${student.id}-${student.studentNo}-${index}-${Date.now()}`} 
-                            className={`cursor-pointer transition-all hover:shadow-md border-2 ${
-                              selectedStudent === student.id ? 'border-blue-500 bg-blue-50' : 'border-gray-200 hover:border-gray-300'
-                            }`}
-                            onClick={() => setSelectedStudent(student.id)}>
-                        <CardContent className="p-3">
-                          <div className="flex items-center justify-between mb-2">
-                            <div className="font-semibold text-sm">{student.name}</div>
-                            <div className="text-xs text-gray-500">#{student.studentNo}</div>
-                          </div>
-                          
-                          <div className="flex gap-2 mb-2">
-                            <div className={`px-2 py-1 text-xs rounded-full font-medium ${
-                              (student.classRank || 0) <= 3 ? 'bg-yellow-100 text-yellow-800 border border-yellow-300' :
-                              (student.classRank || 0) <= 5 ? 'bg-green-100 text-green-800' :
-                              'bg-blue-100 text-blue-800'
-                            }`}>
-                              Sınıf: #{student.classRank || '-'}/{student.totalClassmates || '-'}
-                            </div>
-                            <div className={`px-2 py-1 text-xs rounded-full font-medium ${
-                              (student.rank || 0) <= 10 ? 'bg-yellow-100 text-yellow-800 border border-yellow-300' :
-                              (student.rank || 0) <= 30 ? 'bg-green-100 text-green-800' :
-                              'bg-blue-100 text-blue-800'
-                            }`}>
-                              Okul: #{student.rank || '-'}
-                            </div>
-                          </div>
-                          
-                          <div className="text-xs text-gray-600">
-                            <div>Puan: {student.totalScore?.toFixed(1)} | Okul: %{student.percentile || 0}</div>
-                            {student.classPercentile && <div>Sınıf: %{student.classPercentile}</div>}
-                          </div>
-                        </CardContent>
-                      </Card>
-                    ))}
-                  </div>
-                </div>
-              </div>
-            )}
-
-            {/* Show all students if "all classes" selected */}
-            {selectedClass === 'all' && (
+            {/* Filters */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div>
-                <label className="block text-sm font-medium mb-2">Öğrenci Seç (Tüm Sınıflardan)</label>
+                <label className="block text-sm font-medium mb-2 flex items-center gap-2">
+                  <Search className="h-4 w-4" />
+                  İsim/Numara Ara
+                </label>
+                <Input
+                  type="text"
+                  placeholder="Öğrenci adı veya numarası..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="w-full"
+                />
+              </div>
+              
+              <div>
+                <label className="block text-sm font-medium mb-2 flex items-center gap-2">
+                  <Filter className="h-4 w-4" />
+                  Sınıf Filtrele
+                </label>
+                <Select value={selectedClass} onValueChange={setSelectedClass}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Tüm sınıflar" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">Tüm sınıflar</SelectItem>
+                    {availableClasses.map(cls => (
+                      <SelectItem key={cls} value={cls}>
+                        {cls}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              
+              <div>
+                <label className="block text-sm font-medium mb-2">Öğrenci Seç (Sıralama ile)</label>
                 <Select value={selectedStudent} onValueChange={setSelectedStudent}>
                   <SelectTrigger>
                     <SelectValue placeholder={`Öğrenci seçin... (${filteredStudents.length} öğrenci)`} />
                   </SelectTrigger>
                   <SelectContent className="max-h-60">
-                    {filteredStudents.filter(student => student.id && student.id.trim() !== '').map((student, index) => (
-                      <SelectItem key={`select-all-${student.id}-${student.studentNo}-${index}-${Date.now()}`} value={student.id} className="py-3">
+                    {filteredStudents
+                      .filter(student => student.id && student.id.trim() !== '')
+                      .filter((student, index, array) => {
+                        // Remove any remaining duplicates by ID
+                        return array.findIndex(s => s.id === student.id) === index
+                      })
+                      .map((student, index) => (
+                      <SelectItem key={`${student.id}-${index}`} value={student.id} className="py-3">
                         <div className="flex items-center justify-between w-full">
                           <div className="flex items-center gap-2">
                             <div className={`px-2 py-1 text-xs rounded-full font-medium ${
                               (student.classRank || 0) <= 3 ? 'bg-yellow-100 text-yellow-800 border border-yellow-300' :
                               (student.classRank || 0) <= 5 ? 'bg-green-100 text-green-800' :
-                              'bg-blue-100 text-blue-800'
+                              (student.classRank || 0) > 0 ? 'bg-blue-100 text-blue-800' :
+                              'bg-gray-100 text-gray-600'
                             }`}>
                               S: #{student.classRank || '-'}/{student.totalClassmates || '-'}
                             </div>
                             <div className={`px-2 py-1 text-xs rounded-full font-medium ${
                               (student.rank || 0) <= 10 ? 'bg-yellow-100 text-yellow-800 border border-yellow-300' :
                               (student.rank || 0) <= 30 ? 'bg-green-100 text-green-800' :
-                              'bg-blue-100 text-blue-800'
+                              (student.rank || 0) <= 60 ? 'bg-blue-100 text-blue-800' :
+                              'bg-gray-100 text-gray-800'
                             }`}>
                               O: #{student.rank || '-'}
                             </div>
@@ -1757,7 +1624,7 @@ const ComprehensiveResults = ({ examId, studentId }: ComprehensiveResultsProps) 
                   </SelectContent>
                 </Select>
               </div>
-            )}
+            </div>
             
             {/* Student count info */}
             <div className="flex items-center gap-4 text-sm text-gray-600">
@@ -1794,184 +1661,17 @@ const ComprehensiveResults = ({ examId, studentId }: ComprehensiveResultsProps) 
 
       {/* Student Analysis Results */}
       {analysisData && selectedStudent && (
-        <div id="detailed-analysis-content" className="space-y-8">
-          {/* Header Section with Student Summary */}
-          <Card className="bg-gradient-to-r from-green-50 to-emerald-50 border-green-200">
-            <CardContent className="p-6">
-              <div className="flex items-center justify-between mb-6">
-                <div className="flex items-center gap-4">
-                  <div className="bg-green-100 p-3 rounded-full">
-                    <User className="h-8 w-8 text-green-600" />
-                  </div>
-                  <div>
-                    <h2 className="text-2xl font-bold text-green-800">
-                      {students.find(s => s.id === selectedStudent)?.name || 'Öğrenci'}
-                    </h2>
-                    <p className="text-green-600">
-                      {students.find(s => s.id === selectedStudent)?.class || '-'}/
-                      {students.find(s => s.id === selectedStudent)?.section || '-'} • 
-                      No: {students.find(s => s.id === selectedStudent)?.studentNo || '-'}
-                    </p>
-                  </div>
-                </div>
-                
-                {/* Quick Stats Cards */}
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="bg-white/70 p-4 rounded-lg text-center border border-green-200">
-                    <div className="text-2xl font-bold text-green-700">
-                      {analysisData.studentPerformance.classRank || '-'}
-                    </div>
-                    <div className="text-sm text-green-600">Sınıf Sırası</div>
-                  </div>
-                  <div className="bg-white/70 p-4 rounded-lg text-center border border-green-200">
-                    <div className="text-2xl font-bold text-green-700">
-                      {analysisData.studentPerformance.totalScore?.toFixed(1) || '-'}
-                    </div>
-                    <div className="text-sm text-green-600">Net Puan</div>
-                  </div>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* Performance Overview with Charts */}
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            {/* Overall Performance Pie Chart */}
-            <Card className="lg:col-span-1">
+        <div id="detailed-analysis-content">
+          {/* Student Info & Overall Performance */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {/* Student Info */}
+            <Card>
               <CardHeader>
-                <CardTitle className="flex items-center gap-2 text-lg">
-                  <Target className="h-5 w-5 text-blue-500" />
-                  Genel Performans
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="h-64">
-                  <ResponsiveContainer width="100%" height="100%">
-                    <PieChart>
-                      <Pie
-                        data={[
-                          { name: 'Doğru', value: analysisData.studentPerformance.totalCorrect, fill: '#10b981' },
-                          { name: 'Yanlış', value: analysisData.studentPerformance.totalWrong, fill: '#ef4444' },
-                          { name: 'Boş', value: analysisData.studentPerformance.totalEmpty, fill: '#6b7280' }
-                        ]}
-                        cx="50%"
-                        cy="50%"
-                        outerRadius={80}
-                        dataKey="value"
-                        label={({name, value}) => `${name}: ${value}`}
-                      >
-                        <Cell fill="#10b981" />
-                        <Cell fill="#ef4444" />
-                        <Cell fill="#6b7280" />
-                      </Pie>
-                      <Tooltip />
-                    </PieChart>
-                  </ResponsiveContainer>
-                </div>
-                
-                {/* Performance Stats */}
-                <div className="grid grid-cols-3 gap-2 mt-4">
-                  <div className="text-center p-2 bg-green-50 rounded">
-                    <div className="text-lg font-bold text-green-600">
-                      {analysisData.studentPerformance.totalCorrect}
-                    </div>
-                    <div className="text-xs text-green-500">Doğru</div>
+                <CardTitle className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <User className="h-5 w-5" />
+                    Öğrenci Bilgileri
                   </div>
-                  <div className="text-center p-2 bg-red-50 rounded">
-                    <div className="text-lg font-bold text-red-600">
-                      {analysisData.studentPerformance.totalWrong}
-                    </div>
-                    <div className="text-xs text-red-500">Yanlış</div>
-                  </div>
-                  <div className="text-center p-2 bg-gray-50 rounded">
-                    <div className="text-lg font-bold text-gray-600">
-                      {analysisData.studentPerformance.totalEmpty}
-                    </div>
-                    <div className="text-xs text-gray-500">Boş</div>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-
-            {/* Subject Performance */}
-            <Card className="lg:col-span-2">
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2 text-lg">
-                  <BookOpen className="h-5 w-5 text-purple-500" />
-                  Ders Bazında Performans
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                {analysisData.studentPerformance?.subjectScores && analysisData.studentPerformance.subjectScores.length > 0 ? (
-                  <div className="space-y-4">
-                    {analysisData.studentPerformance.subjectScores.map((subject, index) => (
-                      <div key={index} className="bg-gray-50 rounded-lg p-4">
-                        <div className="flex items-center justify-between mb-3">
-                          <h4 className="font-semibold text-gray-800">{subject.subjectName || 'Ders'}</h4>
-                          <div className="text-sm text-gray-600">
-                            Net: {subject.score?.toFixed(1) || '0'}
-                          </div>
-                        </div>
-                        
-                        <div className="grid grid-cols-3 gap-4">
-                          <div className="text-center">
-                            <div className="w-16 h-16 mx-auto mb-2">
-                              <ResponsiveContainer width="100%" height="100%">
-                                <PieChart>
-                                  <Pie
-                                    data={[
-                                      { value: subject.correct, fill: '#10b981' },
-                                      { value: subject.wrong, fill: '#ef4444' },
-                                      { value: subject.empty, fill: '#6b7280' }
-                                    ]}
-                                    cx="50%"
-                                    cy="50%"
-                                    outerRadius={30}
-                                    innerRadius={20}
-                                    dataKey="value"
-                                  />
-                                </PieChart>
-                              </ResponsiveContainer>
-                            </div>
-                            <div className="text-xs text-gray-600">Dağılım</div>
-                          </div>
-                          
-                          <div className="col-span-2 grid grid-cols-3 gap-2 text-center">
-                            <div className="bg-green-100 p-2 rounded">
-                              <div className="font-bold text-green-600">{subject.correct}</div>
-                              <div className="text-xs text-green-500">Doğru</div>
-                            </div>
-                            <div className="bg-red-100 p-2 rounded">
-                              <div className="font-bold text-red-600">{subject.wrong}</div>
-                              <div className="text-xs text-red-500">Yanlış</div>
-                            </div>
-                            <div className="bg-gray-100 p-2 rounded">
-                              <div className="font-bold text-gray-600">{subject.empty}</div>
-                              <div className="text-xs text-gray-500">Boş</div>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                ) : (
-                  <div className="text-center text-gray-500 py-8">
-                    <BookOpen className="h-12 w-12 mx-auto mb-4 text-gray-300" />
-                    <p>Ders bazında performans verisi bulunamadı</p>
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-          </div>
-
-          {/* Detailed Student Info */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <User className="h-5 w-5" />
-                  Detaylı Öğrenci Bilgileri
-                </div>
                   <div className="flex items-center gap-2">
                     {analysisData.studentPerformance.classRank && (
                       <div className={`px-3 py-1 rounded-full text-sm font-medium ${
@@ -2132,7 +1832,7 @@ const ComprehensiveResults = ({ examId, studentId }: ComprehensiveResultsProps) 
                                 <CardContent>
                                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                                     {examComparison.subjectStats.map((subject, index) => (
-                                      <div key={index} className="border rounded-lg p-4">
+                                      <div key={`${subject.subjectName}-${index}`} className="border rounded-lg p-4">
                                         <h5 className="font-medium text-center mb-3">{subject.subjectName}</h5>
                                         <div className="space-y-2">
                                           <div className="flex justify-between text-sm">
@@ -2182,7 +1882,7 @@ const ComprehensiveResults = ({ examId, studentId }: ComprehensiveResultsProps) 
                                           const total = topic.correct + topic.wrong + topic.empty
                                           const successRate = total > 0 ? ((topic.correct / total) * 100) : 0
                                           return (
-                                            <TableRow key={index}>
+                                            <TableRow key={`${topic.topicName}-${index}`}>
                                               <TableCell className="font-medium">{topic.topicName}</TableCell>
                                               <TableCell className="text-center text-green-600">{topic.correct}</TableCell>
                                               <TableCell className="text-center text-red-600">{topic.wrong}</TableCell>
