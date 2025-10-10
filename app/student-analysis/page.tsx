@@ -1,10 +1,10 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, Suspense } from 'react'
 import { useSearchParams } from 'next/navigation'
 import StudentAnalysis from '@/components/admin/student-analysis'
 
-export default function StudentAnalysisPage() {
+function StudentAnalysisContent() {
   const searchParams = useSearchParams()
   const [examId, setExamId] = useState<string>('')
 
@@ -35,5 +35,20 @@ export default function StudentAnalysisPage() {
       
       <StudentAnalysis examId={examId} />
     </div>
+  )
+}
+
+export default function StudentAnalysisPage() {
+  return (
+    <Suspense fallback={
+      <div className="container mx-auto p-6">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-4"></div>
+          <p>Yükleniyor...</p>
+        </div>
+      </div>
+    }>
+      <StudentAnalysisContent />
+    </Suspense>
   )
 }

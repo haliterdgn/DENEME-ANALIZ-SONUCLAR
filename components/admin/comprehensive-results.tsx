@@ -152,7 +152,6 @@ interface StudentAnalysisData {
 
 const ComprehensiveResults = ({ examId, studentId }: ComprehensiveResultsProps) => {
   const router = useRouter()
-  const searchParams = useSearchParams()
   const { selectedExam, exams } = useExamStore()
   const [analysisData, setAnalysisData] = useState<StudentAnalysisData | null>(null)
   const [students, setStudents] = useState<Array<{
