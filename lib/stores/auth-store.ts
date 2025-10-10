@@ -13,6 +13,7 @@ export interface User {
 interface AuthState {
   user: User | null
   login: (username: string, password: string, role: string) => boolean
+  setUser: (user: User) => void
   logout: () => void
 }
 
@@ -63,6 +64,7 @@ export const useAuthStore = create<AuthState>()(
         }
         return false
       },
+      setUser: (user: User) => set({ user }),
       logout: () => set({ user: null }),
     }),
     {

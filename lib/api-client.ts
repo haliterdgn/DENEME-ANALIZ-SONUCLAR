@@ -554,9 +554,26 @@ class ApiClient {
         const result = await this.request(endpoint)
         
         if (result?.results && Array.isArray(result.results)) {
-          allResults = [...allResults, ...result.results]
+          // Filter out duplicates by student ID before adding to allResults
+          const newUniqueResults = result.results.filter((newResult: any) => {
+            const newId = newResult.studentInfo?.tcKimlikNo || newResult.studentInfo?.ogrenciNo
+            if (!newId) return true // Keep results without ID
+            
+            // Check if this ID already exists in allResults
+            return !allResults.some((existingResult: any) => {
+              const existingId = existingResult.studentInfo?.tcKimlikNo || existingResult.studentInfo?.ogrenciNo
+              return existingId === newId
+            })
+          })
           
-          console.log(`✅ Batch loaded: ${result.results.length} students (total so far: ${allResults.length})`)
+          allResults = [...allResults, ...newUniqueResults]
+          
+          const duplicatesFiltered = result.results.length - newUniqueResults.length
+          if (duplicatesFiltered > 0) {
+            console.log(`🔄 Filtered ${duplicatesFiltered} duplicates in this batch`)
+          }
+          
+          console.log(`✅ Batch loaded: ${newUniqueResults.length} unique students (total so far: ${allResults.length})`)
           
           // Check if there are more results
           hasMore = result.hasMore === true || result.results.length === limit
@@ -618,17 +635,15 @@ class ApiClient {
       // studentId birden fazla formatta gelebilir - UUID, TC kimlik no, öğrenci no
       const student = Array.isArray(studentResults) 
         ? studentResults.find((s: any) => {
-            // Birden fazla kritere göre arama yap
-            const matches = [
-              s.id === studentId,
-              s.studentInfo?.tcKimlikNo === studentId,
-              s.studentInfo?.ogrenciNo === studentId,
-              // Eğer studentId bir UUID ise, TC kimlik no ile eşleştirmeyi dene
-              s.studentInfo?.tcKimlikNo && studentId.length > 20, // UUID uzunluğu kontrolü
-              // Eğer studentId kısa ise (öğrenci no), öğrenci no ile eşleştir
-              s.studentInfo?.ogrenciNo && studentId.length < 20
-            ]
-            return matches.some(Boolean)
+            // Doğru eşleştirme kriterleri
+            const tcMatch = s.studentInfo?.tcKimlikNo === studentId
+            const ogrenciNoMatch = s.studentInfo?.ogrenciNo === studentId
+            const idMatch = s.id === studentId
+            
+            console.log(`🔍 Checking student: ${s.studentInfo?.ogrenciAdi}, ID: ${s.id}, TC: ${s.studentInfo?.tcKimlikNo}, OgrNo: ${s.studentInfo?.ogrenciNo}`)
+            console.log(`   → ID Match: ${idMatch}, TC Match: ${tcMatch}, OgrNo Match: ${ogrenciNoMatch}`)
+            
+            return tcMatch || ogrenciNoMatch || idMatch
           })
         : null
       
@@ -662,6 +677,9 @@ class ApiClient {
       
       console.log('📤 Gönderilen student analysis verisi:', requestData)
       console.log('👤 Bulunan student verisi:', student)
+      console.log('🔍 Aranan Student ID:', studentId)
+      console.log('🎯 Gönderilen Student No:', requestData.studentNo)
+      console.log('✅ Doğru student bulundu mu?', student.studentInfo?.ogrenciNo === studentId || student.studentInfo?.tcKimlikNo === studentId)
       
       const result = await this.request(`/api/exams/${examId}/student-analysis`, {
         method: 'POST',
@@ -671,9 +689,169 @@ class ApiClient {
         body: JSON.stringify(requestData)
       })
       console.log('✅ Student analysis alındı:', result?.studentInfo?.ogrenciAdi || 'Bilinmeyen')
+      console.log('🆔 Dönen Student ID/TC:', result?.studentInfo?.tcKimlikNo || result?.studentInfo?.ogrenciNo)
       return result || null
     } catch (error: any) {
       console.error('❌ Student analysis getirme hatası:', error)
+      throw error
+    }
+  }
+
+  // =====================================
+  // USER MANAGEMENT METHODS
+  // =====================================
+  
+  // Get all users (only for admin)
+  async getUsers(): Promise<any[]> {
+    try {
+      const result = await this.request('/api/users')
+      return result || []
+    } catch (error) {
+      console.error('❌ Kullanıcılar yüklenemedi:', error)
+      return []
+    }
+  }
+
+  // Create new user (only for admin)
+  async createUser(userData: {
+    username: string
+    password: string
+    role: 'admin' | 'teacher' | 'student'
+    name: string
+    email: string
+  }): Promise<any> {
+    return this.request('/api/users', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(userData)
+    })
+  }
+
+  // Update user (only for admin)
+  async updateUser(userId: string, userData: {
+    username?: string
+    password?: string
+    role?: 'admin' | 'teacher' | 'student'
+    name?: string
+    email?: string
+  }): Promise<any> {
+    return this.request(`/api/users/${userId}`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(userData)
+    })
+  }
+
+  // Delete user (only for admin)
+  async deleteUser(userId: string): Promise<any> {
+    return this.request(`/api/users/${userId}`, {
+      method: 'DELETE'
+    })
+  }
+
+  // User login
+  async loginUser(username: string, password: string): Promise<any> {
+    return this.request('/api/users/login', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({ username, password })
+    })
+  }
+
+  // =====================================
+  // STUDENT MANAGEMENT METHODS
+  // =====================================
+  
+  // Get all students
+  async getStudentsForManagement(): Promise<any[]> {
+    try {
+      const result = await this.request('/api/students')
+      console.log('API Response:', result)
+      return result?.students || []
+    } catch (error) {
+      console.error('❌ Öğrenciler yüklenemedi:', error)
+      return []
+    }
+  }
+
+  // Create new student
+  async createStudent(studentData: {
+    studentNo: string
+    fullName: string
+    classLevel: string
+    section: string
+    parentPhone: string
+  }): Promise<any> {
+    return this.request('/api/students', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(studentData)
+    })
+  }
+
+  // Update student
+  async updateStudent(studentId: string, studentData: {
+    studentNo?: string
+    fullName?: string
+    classLevel?: string
+    section?: string
+    parentPhone?: string
+  }): Promise<any> {
+    return this.request(`/api/students/${studentId}`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(studentData)
+    })
+  }
+
+  // Delete student
+  async deleteStudent(studentId: string): Promise<any> {
+    return this.request(`/api/students/${studentId}`, {
+      method: 'DELETE'
+    })
+  }
+
+  // Upload students Excel file (only for admin)
+  async uploadStudentsExcel(file: File): Promise<any> {
+    const formData = new FormData()
+    formData.append('file', file)
+    
+    return this.request('/api/students/upload-excel', {
+      method: 'POST',
+      body: formData
+    })
+  }
+
+  // Student login
+  async loginStudent(studentNo: string, fullName: string): Promise<any> {
+    const loginData = { studentNo, fullName }
+    console.log('🔍 API Client Login Data:', loginData)
+    console.log('🔍 JSON Body:', JSON.stringify(loginData))
+    console.log('🔍 URL:', '/api/students/login')
+    console.log('🔍 Full URL:', `${this.baseUrl}/api/students/login`)
+    
+    try {
+      const response = await this.request('/api/students/login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(loginData)
+      })
+      console.log('✅ Login API Response:', response)
+      return response
+    } catch (error) {
+      console.error('❌ Login API Error:', error)
       throw error
     }
   }
@@ -693,6 +871,64 @@ class ApiClient {
 
   async uploadTxtResults(examId: string, file: File, optikFormId: string) {
     return this.uploadTxt(examId, file, optikFormId)
+  }
+
+  // Get student results by student number
+  async getStudentResultsByNumber(studentNumber: string): Promise<any[]> {
+    try {
+      // Get all exams first
+      const exams = await this.getExams()
+      const studentResults: any[] = []
+
+      // For each exam, get student results and filter by student number
+      for (const exam of exams) {
+        try {
+          const examResults = await this.getStudentResults(exam._id)
+          const studentResult = examResults.find((result: any) => 
+            result.studentInfo?.ogrenciNo === studentNumber ||
+            result.studentInfo?.studentNumber === studentNumber ||
+            result.studentNumber === studentNumber
+          )
+          
+          if (studentResult) {
+            studentResults.push({
+              ...studentResult,
+              examInfo: {
+                examId: exam._id,
+                examName: exam.name,
+                examDate: exam.createdAt,
+                className: exam.className,
+                subject: exam.subject
+              }
+            })
+          }
+        } catch (error) {
+          console.log(`Exam ${exam._id} için sonuç bulunamadı:`, error)
+        }
+      }
+
+      return studentResults
+    } catch (error) {
+      console.error('Öğrenci sonuçları alınamadı:', error)
+      throw error
+    }
+  }
+
+  // Get student exam details by student number and exam id
+  async getStudentExamResult(studentNumber: string, examId: string): Promise<any | null> {
+    try {
+      const examResults = await this.getStudentResults(examId)
+      const studentResult = examResults.find((result: any) => 
+        result.studentInfo?.ogrenciNo === studentNumber ||
+        result.studentInfo?.studentNumber === studentNumber ||
+        result.studentNumber === studentNumber
+      )
+      
+      return studentResult || null
+    } catch (error) {
+      console.error('Öğrenci sınav sonucu alınamadı:', error)
+      return null
+    }
   }
 }
 

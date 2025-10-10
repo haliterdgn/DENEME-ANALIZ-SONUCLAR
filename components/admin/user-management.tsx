@@ -1,237 +1,252 @@
-"use client"
+﻿"use client"
 
-import { useState } from "react"
-import { useForm } from "react-hook-form"
+import { useState, useEffect } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
+import { Badge } from "@/components/ui/badge"
+import { Users, UserPlus, Edit, Trash2 } from "lucide-react"
+import { Alert, AlertDescription } from "@/components/ui/alert"
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Badge } from "@/components/ui/badge"
-import { useUserStore } from "@/lib/stores/user-store"
-import type { User } from "@/lib/stores/auth-store"
-import { Plus, Edit, Trash2, Users } from "lucide-react"
-import { Alert, AlertDescription } from "@/components/ui/alert"
+import { apiClient } from "@/lib/api-client"
 
-interface UserFormData {
+interface User {
+  _id: string
   username: string
+  role: string
   name: string
   email: string
-  role: "teacher" | "student"
-  classId?: string
 }
 
 export default function UserManagement() {
-  const [showForm, setShowForm] = useState(false)
-  const [editingUser, setEditingUser] = useState<User | null>(null)
+  const [users, setUsers] = useState<User[]>([])
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState("")
   const [success, setSuccess] = useState("")
-  const { users, addUser, updateUser, deleteUser } = useUserStore()
+  
+  // Modal states
+  const [showCreateModal, setShowCreateModal] = useState(false)
+  const [showEditModal, setShowEditModal] = useState(false)
+  const [selectedUser, setSelectedUser] = useState<User | null>(null)
+  
+  // Form states
+  const [formData, setFormData] = useState({
+    username: "",
+    password: "",
+    name: "",
+    email: "",
+    role: "teacher" as "teacher" | "admin" | "student"
+  })
 
-  const {
-    register,
-    handleSubmit,
-    reset,
-    setValue,
-    watch,
-    formState: { errors },
-  } = useForm<UserFormData>()
-  const selectedRole = watch("role")
+  useEffect(() => {
+    loadUsers()
+  }, [])
 
-  const onSubmit = (data: UserFormData) => {
-    if (editingUser) {
-      updateUser(editingUser.id, data)
-      setSuccess("Kullanıcı başarıyla güncellendi!")
-      setEditingUser(null)
-    } else {
-      addUser(data)
-      setSuccess("Kullanıcı başarıyla oluşturuldu!")
-    }
-
-    reset()
-    setShowForm(false)
-    setTimeout(() => setSuccess(""), 3000)
-  }
-
-  const handleEdit = (user: User) => {
-    setEditingUser(user)
-    setValue("username", user.username)
-    setValue("name", user.name)
-    setValue("email", user.email || "")
-    setValue("role", user.role as "teacher" | "student")
-    setValue("classId", user.classId || "")
-    setShowForm(true)
-  }
-
-  const handleDelete = (userId: string) => {
-    if (confirm("Bu kullanıcıyı silmek istediğinizden emin misiniz?")) {
-      deleteUser(userId)
-      setSuccess("Kullanıcı başarıyla silindi!")
-      setTimeout(() => setSuccess(""), 3000)
+  const loadUsers = async () => {
+    try {
+      setLoading(true)
+      const usersData = await apiClient.getUsers()
+      setUsers(usersData)
+      console.log('✅ Kullanıcılar yüklendi:', usersData.length)
+    } catch (error) {
+      console.error('❌ Kullanıcılar yüklenemedi:', error)
+      setError('Kullanıcılar yüklenemedi')
+    } finally {
+      setLoading(false)
     }
   }
 
-  const handleCancel = () => {
-    setShowForm(false)
-    setEditingUser(null)
-    reset()
+  const handleCreateUser = async (e: React.FormEvent) => {
+    e.preventDefault()
+    if (!formData.username || !formData.password || !formData.name || !formData.email) {
+      setError("Tüm alanlar zorunludur")
+      return
+    }
+
+    try {
+      setLoading(true)
+      await apiClient.createUser(formData)
+      setSuccess("Kullanıcı başarıyla oluşturuldu")
+      setShowCreateModal(false)
+      resetForm()
+      loadUsers()
+    } catch (error) {
+      console.error('❌ Kullanıcı oluşturulamadı:', error)
+      setError('Kullanıcı oluşturulamadı')
+    } finally {
+      setLoading(false)
+    }
   }
 
-  const teachers = users.filter((u) => u.role === "teacher")
-  const students = users.filter((u) => u.role === "student")
+  const resetForm = () => {
+    setFormData({
+      username: "",
+      password: "",
+      name: "",
+      email: "",
+      role: "teacher" as "teacher" | "admin" | "student"
+    })
+    setError("")
+    setSuccess("")
+  }
+
+  const openCreateModal = () => {
+    resetForm()
+    setShowCreateModal(true)
+  }
 
   return (
     <div className="space-y-6">
-      <div className="flex justify-between items-center">
-        <h2 className="text-2xl font-bold">Kullanıcı Yönetimi</h2>
-        <Button onClick={() => setShowForm(true)} className="flex items-center gap-2">
-          <Plus className="h-4 w-4" />
-          Yeni Kullanıcı Ekle
-        </Button>
-      </div>
-
+      {error && (
+        <Alert className="border-red-200 bg-red-50">
+          <AlertDescription className="text-red-800">{error}</AlertDescription>
+        </Alert>
+      )}
+      
       {success && (
-        <Alert>
-          <AlertDescription>{success}</AlertDescription>
+        <Alert className="border-green-200 bg-green-50">
+          <AlertDescription className="text-green-800">{success}</AlertDescription>
         </Alert>
       )}
 
-      {/* User Form */}
-      {showForm && (
-        <Card>
-          <CardHeader>
-            <CardTitle>{editingUser ? "Kullanıcı Düzenle" : "Yeni Kullanıcı Oluştur"}</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="username">Kullanıcı Adı</Label>
-                  <Input
-                    id="username"
-                    {...register("username", { required: "Kullanıcı adı gereklidir" })}
-                    placeholder="Kullanıcı adı girin"
-                  />
-                  {errors.username && <p className="text-sm text-red-600">{errors.username.message}</p>}
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="name">Ad Soyad</Label>
-                  <Input
-                    id="name"
-                    {...register("name", { required: "Ad soyad gereklidir" })}
-                    placeholder="Ad soyad girin"
-                  />
-                  {errors.name && <p className="text-sm text-red-600">{errors.name.message}</p>}
-                </div>
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="email">E-posta</Label>
-                  <Input id="email" type="email" {...register("email")} placeholder="E-posta adresi girin" />
-                </div>
-
-                <div className="space-y-2">
-                  <Label>Rol</Label>
-                  <Select onValueChange={(value) => setValue("role", value as any)}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Rol seçin" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="teacher">👩‍🏫 Öğretmen</SelectItem>
-                      <SelectItem value="student">🧑‍🎓 Öğrenci</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-              </div>
-
-              {selectedRole === "student" && (
-                <div className="space-y-2">
-                  <Label htmlFor="classId">Sınıf ID</Label>
-                  <Input id="classId" {...register("classId")} placeholder="e.g., class-1, 9A, 10B" />
-                </div>
-              )}
-
-              <div className="flex justify-end space-x-4">
-                <Button type="button" variant="outline" onClick={handleCancel}>
-                  İptal
-                </Button>
-                <Button type="submit">{editingUser ? "Kullanıcı Güncelle" : "Kullanıcı Oluştur"}</Button>
-              </div>
-            </form>
-          </CardContent>
-        </Card>
-      )}
-
-      {/* Users List */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Teachers */}
-        <Card>
-          <CardHeader>
+      <Card>
+        <CardHeader>
+          <div className="flex items-center justify-between">
             <CardTitle className="flex items-center gap-2">
               <Users className="h-5 w-5" />
-              Öğretmenler ({teachers.length})
+              Kullanıcılar ({users.length})
             </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-3">
-              {teachers.map((teacher) => (
-                <div key={teacher.id} className="flex items-center justify-between p-3 border rounded-lg">
-                  <div>
-                    <p className="font-medium">{teacher.name}</p>
-                    <p className="text-sm text-gray-600">@{teacher.username}</p>
-                    {teacher.email && <p className="text-sm text-gray-600">{teacher.email}</p>}
+            <Button onClick={openCreateModal} className="flex items-center gap-2">
+              <UserPlus className="h-4 w-4" />
+              Yeni Kullanıcı
+            </Button>
+          </div>
+        </CardHeader>
+        <CardContent>
+          {loading ? (
+            <div className="text-center py-8">Kullanıcılar yükleniyor...</div>
+          ) : users.length === 0 ? (
+            <div className="text-center py-8 text-gray-500">Henüz kullanıcı bulunmamaktadır.</div>
+          ) : (
+            <div className="space-y-4">
+              {users.map((user) => (
+                <div key={user._id} className="flex items-center justify-between p-4 border rounded-lg">
+                  <div className="flex items-center gap-4">
+                    <div>
+                      <h3 className="font-medium">{user.name}</h3>
+                      <p className="text-sm text-gray-500">@{user.username}</p>
+                      <p className="text-sm text-gray-500">{user.email}</p>
+                    </div>
+                    <Badge variant={user.role === 'admin' ? 'destructive' : 'default'}>
+                      {user.role === 'admin' ? 'Müdür' : 'Öğretmen'}
+                    </Badge>
                   </div>
-                  <div className="flex items-center space-x-2">
-                    <Badge variant="secondary">Öğretmen</Badge>
-                    <Button size="sm" variant="outline" onClick={() => handleEdit(teacher)}>
+                  
+                  <div className="flex items-center gap-2">
+                    <Button variant="outline" size="sm">
                       <Edit className="h-4 w-4" />
                     </Button>
-                    <Button size="sm" variant="outline" onClick={() => handleDelete(teacher.id)}>
+                    <Button variant="outline" size="sm" className="text-red-600 hover:text-red-700">
                       <Trash2 className="h-4 w-4" />
                     </Button>
                   </div>
                 </div>
               ))}
-              {teachers.length === 0 && <p className="text-gray-500 text-center py-4">Öğretmen bulunamadı</p>}
             </div>
-          </CardContent>
-        </Card>
+          )}
+        </CardContent>
+      </Card>
 
-        {/* Students */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Users className="h-5 w-5" />
-              Öğrenciler ({students.length})
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-3">
-              {students.map((student) => (
-                <div key={student.id} className="flex items-center justify-between p-3 border rounded-lg">
-                  <div>
-                    <p className="font-medium">{student.name}</p>
-                    <p className="text-sm text-gray-600">@{student.username}</p>
-                    {student.email && <p className="text-sm text-gray-600">{student.email}</p>}
-                    {student.classId && <p className="text-sm text-gray-600">Sınıf: {student.classId}</p>}
-                  </div>
-                  <div className="flex items-center space-x-2">
-                    <Badge variant="default">Öğrenci</Badge>
-                    <Button size="sm" variant="outline" onClick={() => handleEdit(student)}>
-                      <Edit className="h-4 w-4" />
-                    </Button>
-                    <Button size="sm" variant="outline" onClick={() => handleDelete(student.id)}>
-                      <Trash2 className="h-4 w-4" />
-                    </Button>
-                  </div>
-                </div>
-              ))}
-              {students.length === 0 && <p className="text-gray-500 text-center py-4">Öğrenci bulunamadı</p>}
+      {/* Create User Modal */}
+      <Dialog open={showCreateModal} onOpenChange={setShowCreateModal}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>Yeni Kullanıcı Oluştur</DialogTitle>
+          </DialogHeader>
+          <form onSubmit={handleCreateUser} className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="create-name">Ad Soyad</Label>
+              <Input
+                id="create-name"
+                value={formData.name}
+                onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                placeholder="Ad ve soyadı girin"
+                disabled={loading}
+              />
             </div>
-          </CardContent>
-        </Card>
-      </div>
+            
+            <div className="space-y-2">
+              <Label htmlFor="create-username">Kullanıcı Adı</Label>
+              <Input
+                id="create-username"
+                value={formData.username}
+                onChange={(e) => setFormData({ ...formData, username: e.target.value })}
+                placeholder="Kullanıcı adını girin"
+                disabled={loading}
+              />
+            </div>
+            
+            <div className="space-y-2">
+              <Label htmlFor="create-email">Email</Label>
+              <Input
+                id="create-email"
+                type="email"
+                value={formData.email}
+                onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                placeholder="Email adresini girin"
+                disabled={loading}
+              />
+            </div>
+            
+            <div className="space-y-2">
+              <Label htmlFor="create-password">Şifre</Label>
+              <Input
+                id="create-password"
+                type="password"
+                value={formData.password}
+                onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                placeholder="Şifre girin"
+                disabled={loading}
+              />
+            </div>
+            
+            <div className="space-y-2">
+              <Label htmlFor="create-role">Rol</Label>
+              <Select
+                value={formData.role}
+                onValueChange={(value: "teacher" | "admin" | "student") => 
+                  setFormData({ ...formData, role: value })
+                }
+                disabled={loading}
+              >
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="teacher">Öğretmen</SelectItem>
+                  <SelectItem value="admin">Müdür</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            
+            <div className="flex justify-end gap-3 pt-4">
+              <Button 
+                type="button" 
+                variant="outline" 
+                onClick={() => setShowCreateModal(false)}
+                disabled={loading}
+              >
+                İptal
+              </Button>
+              <Button type="submit" disabled={loading}>
+                {loading ? "Oluşturuluyor..." : "Oluştur"}
+              </Button>
+            </div>
+          </form>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }

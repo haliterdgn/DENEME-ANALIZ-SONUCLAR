@@ -24,10 +24,12 @@ import {
   Upload,
   Zap,
   Award,
-  UserCheck
+  UserCheck,
+  GraduationCap
 } from "lucide-react"
 import CreateExamForm from "./create-exam-form"
 import UserManagement from "./user-management"
+import StudentManagement from "./student-management"
 import ExamList from "./exam-list"
 import AnalyticsDashboard from "./analytics-dashboard"
 import { useExamStore } from "@/lib/stores/exam-store"
@@ -101,9 +103,15 @@ export default function AdminDashboard() {
     },
     {
       title: "Kullanıcı Yönetimi", 
-      description: "Öğrenci ve öğretmenleri yönet",
+      description: "Personel hesaplarını yönet",
       icon: Users,
       action: () => setActiveView("users")
+    },
+    {
+      title: "Öğrenci Yönetimi", 
+      description: "Öğrencileri yönet ve Excel ile yükle",
+      icon: GraduationCap,
+      action: () => setActiveView("students")
     },
     {
       title: "Sınav Tipleri",
@@ -134,6 +142,7 @@ export default function AdminDashboard() {
         
         {activeView === "create" && <CreateExamForm />}
         {activeView === "users" && <UserManagement />}
+        {activeView === "students" && <StudentManagement />}
         {activeView === "exams" && <ExamList />}
         {activeView === "analytics" && <AnalyticsDashboard />}
         {activeView === "optik" && <OptikFormTanimla />}

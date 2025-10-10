@@ -39,9 +39,8 @@ export default function AnalyticsDashboard() {
     try {
       console.log('🔍 Analyze Student Results başlatılıyor, ExamID:', selectedExam)
       
-      const analysisResult = await apiClient.analyzeExamResults(selectedExam, {
-        includeDetails: true,
-        classFilter: selectedClass || undefined
+      const analysisResult = await apiClient.analyzeResults(selectedExam, {
+        includeDetails: true
       })
       
       console.log('✅ Analyze Student Results başarılı:', analysisResult)
@@ -134,17 +133,20 @@ export default function AnalyticsDashboard() {
   })
 
   // Subject performance analysis - Ders bazında başarı analizi
-  const subjectPerformance = results.reduce(
+  const subjectPerformance = studentResults.reduce(
     (acc, result) => {
-      Object.entries(result.subjectScores).forEach(([subject, scores]) => {
-        if (!acc[subject]) {
-          acc[subject] = { correct: 0, total: 0, attempts: 0 }
-        }
-        const typedScores = scores as { correct: number; total: number }
-        acc[subject].correct += typedScores.correct
-        acc[subject].total += typedScores.total
-        acc[subject].attempts++
-      })
+      // subjectScores array olarak geliyor, object değil
+      if (Array.isArray(result.subjectScores)) {
+        result.subjectScores.forEach((subjectScore: any) => {
+          const subject = subjectScore.subjectName
+          if (!acc[subject]) {
+            acc[subject] = { correct: 0, total: 0, attempts: 0 }
+          }
+          acc[subject].correct += subjectScore.correct || 0
+          acc[subject].total += (subjectScore.correct || 0) + (subjectScore.wrong || 0) + (subjectScore.empty || 0)
+          acc[subject].attempts++
+        })
+      }
       return acc
     },
     {} as Record<string, { correct: number; total: number; attempts: number }>,
@@ -195,7 +197,7 @@ export default function AnalyticsDashboard() {
           {payload.map((entry: any, index: number) => (
             <p key={index} style={{ color: entry.color }}>
               {entry.name}: {entry.value}
-              {entry.name.includes("Score") || entry.name.includes("percentage") ? "%" : ""}
+              {entry.name && (entry.name.includes("Score") || entry.name.includes("percentage")) ? "%" : ""}
             </p>
           ))}
         </div>
@@ -610,7 +612,7 @@ export default function AnalyticsDashboard() {
               {subjectData
                 .sort((a, b) => b.percentage - a.percentage)
                 .map((subject, index) => (
-                  <div key={subject.subject} className="flex items-center justify-between p-3 bg-blue-50 rounded-lg">
+                  <div key={`${subject.subject}-${index}`} className="flex items-center justify-between p-3 bg-blue-50 rounded-lg">
                     <div className="flex items-center gap-3">
                       <div className="w-8 h-8 bg-blue-100 text-blue-800 rounded-full flex items-center justify-center text-sm font-bold">
                         {index + 1}

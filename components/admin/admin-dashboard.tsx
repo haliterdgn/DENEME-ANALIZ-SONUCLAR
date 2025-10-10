@@ -24,10 +24,12 @@ import {
   Upload,
   Zap,
   Award,
-  UserCheck
+  UserCheck,
+  GraduationCap
 } from "lucide-react"
 import CreateExamForm from "./create-exam-form"
 import UserManagement from "./user-management"
+import StudentManagement from "./student-management"
 import ExamList from "./exam-list"
 import AnalyticsDashboard from "./analytics-dashboard"
 import { useExamStore } from "@/lib/stores/exam-store"
@@ -101,9 +103,15 @@ export default function AdminDashboard() {
     },
     {
       title: "Kullanıcı Yönetimi", 
-      description: "Öğrenci ve öğretmenleri yönet",
+      description: "Personel hesaplarını yönet",
       icon: Users,
       action: () => setActiveView("users")
+    },
+    {
+      title: "Öğrenci Yönetimi", 
+      description: "Öğrencileri yönet ve Excel ile yükle",
+      icon: GraduationCap,
+      action: () => setActiveView("students")
     },
     {
       title: "Sınav Tipleri",
@@ -134,6 +142,7 @@ export default function AdminDashboard() {
         
         {activeView === "create" && <CreateExamForm />}
         {activeView === "users" && <UserManagement />}
+        {activeView === "students" && <StudentManagement />}
         {activeView === "exams" && <ExamList />}
         {activeView === "analytics" && <AnalyticsDashboard />}
         {activeView === "optik" && <OptikFormTanimla />}
@@ -166,6 +175,35 @@ export default function AdminDashboard() {
           </div>
         </div>
       </div>
+
+      {/* System Status */}
+      <Card className="border-green-200 bg-gradient-to-r from-green-50 to-blue-50">
+        <CardContent className="p-6">
+          <div className="flex items-center gap-3 mb-4">
+            <div className="w-3 h-3 bg-green-500 rounded-full animate-pulse"></div>
+            <h3 className="text-lg font-semibold text-green-800">Sistem Durumu: Aktif</h3>
+            <Badge className="bg-green-100 text-green-800">Çevrimiçi</Badge>
+          </div>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
+            <div className="flex items-center gap-2">
+              <CheckCircle className="h-4 w-4 text-green-600" />
+              <span>API Bağlantısı</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <CheckCircle className="h-4 w-4 text-green-600" />
+              <span>Veritabanı</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <CheckCircle className="h-4 w-4 text-green-600" />
+              <span>Dosya Sistemi</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <CheckCircle className="h-4 w-4 text-green-600" />
+              <span>Analiz Motoru</span>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
 
       {/* Quick Stats */}
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-6">
