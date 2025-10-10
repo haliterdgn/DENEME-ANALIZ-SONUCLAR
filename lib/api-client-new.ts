@@ -1,4 +1,4 @@
-const API_BASE_URL = 'http://34.236.53.26'
+const API_BASE_URL = 'http://34.236.53.26:3001'
 
 // API Types
 interface ApiResponse<T = any> {
